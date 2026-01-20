@@ -52,3 +52,14 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# IDEs
+.vs/
+.vscode/
+.idea/
+
+# Environment / secrets
+.env
+.env.*
+appsettings.Development.json
+appsettings.json
