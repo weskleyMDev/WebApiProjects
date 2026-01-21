@@ -22,13 +22,13 @@ public class CategoriesController(AppDbContext context) : ControllerBase
         return categories;
     }
 
-    [HttpGet("{id:int}", Name = "GetCategoryById")]
+    [HttpGet("{id:int:min(1)}", Name = "GetCategoryById")]
     public ActionResult<Category> Get(int id)
     {
         var category = _context.Categories.FirstOrDefault(c => c.CategoryId == id);
         if (category is null)
         {
-            return NotFound("Category not found!");
+            return NotFound($"Category {id} not found!");
         }
         return category;
     }
@@ -56,19 +56,19 @@ public class CategoriesController(AppDbContext context) : ControllerBase
         return new CreatedAtRouteResult("GetCategoryById", new { id = category.CategoryId }, category);
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:int:min(1)}")]
     public ActionResult Put(int id, Category category)
     {
         if (id != category.CategoryId)
         {
             return BadRequest();
         }
-        _context.Entry(category).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+        _context.Entry(category).State = EntityState.Modified;
         _context.SaveChanges();
         return Ok(category);
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:int:min(1)}")]
     public ActionResult Delete(int id)
     {
         var category = _context.Categories.FirstOrDefault(c => c.CategoryId == id);

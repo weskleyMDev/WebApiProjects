@@ -12,9 +12,9 @@ public class ProductsController(AppDbContext context) : ControllerBase
     private readonly AppDbContext _context = context;
 
     [HttpGet]
-    public ActionResult<IEnumerable<Product>> Get()
+    public async Task<ActionResult<IEnumerable<Product>>> GetProductsAsync()
     {
-        var products = _context.Products.Take(10).ToList();
+        var products = await _context.Products.AsNoTracking().ToListAsync();
         if (products is null)
         {
             return NotFound();
@@ -22,13 +22,13 @@ public class ProductsController(AppDbContext context) : ControllerBase
         return products;
     }
 
-    [HttpGet("{id:int}", Name = "GetProductById")]
-    public ActionResult<Product> Get(int id)
+    [HttpGet("{id:int:min(1)}", Name = "GetProductById")]
+    public async Task<ActionResult<Product>> GetProductAsync(int id)
     {
-        var product = _context.Products.FirstOrDefault(p => p.ProductId == id);
+        var product = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProductId == id);
         if (product is null)
         {
-            return NotFound("Product not found!");
+            return NotFound($"Product {id} not found!");
         }
         return product;
     }
@@ -45,25 +45,25 @@ public class ProductsController(AppDbContext context) : ControllerBase
         return new CreatedAtRouteResult("GetProductById", new { id = product.ProductId }, product);
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:int:min(1)}")]
     public ActionResult Put(int id, Product product)
     {
         if (id != product.ProductId)
         {
             return BadRequest();
         }
-        _context.Entry(product).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+        _context.Entry(product).State = EntityState.Modified;
         _context.SaveChanges();
         return Ok(product);
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:int:min(1)}")]
     public ActionResult Delete(int id)
     {
         var product = _context.Products.FirstOrDefault(p => p.ProductId == id);
         if (product is null)
         {
-            return NotFound("Product not found!");
+            return NotFound($"Product {id} not found!");
         }
         _context.Products.Remove(product);
         _context.SaveChanges();
