@@ -2,6 +2,7 @@ using CatalogoAPI.Context;
 using CatalogoAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace CatalogoAPI.Controllers;
 
@@ -36,10 +37,10 @@ public class ProductsController(AppDbContext context) : ControllerBase
     [HttpPost]
     public ActionResult Post(Product product)
     {
-        if (product is null)
-        {
-            return BadRequest();
-        }
+        // if (!ModelState.IsValid)
+        // {
+        //     return BadRequest(ModelState);
+        // }
         _context.Products.Add(product);
         _context.SaveChanges();
         return new CreatedAtRouteResult("GetProductById", new { id = product.ProductId }, product);
