@@ -7,9 +7,18 @@ namespace CatalogoAPI.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class CategoriesController(AppDbContext context) : ControllerBase
+public class CategoriesController(AppDbContext context, IConfiguration configuration) : ControllerBase
 {
     private readonly AppDbContext _context = context;
+    private readonly IConfiguration _configuration = configuration;
+
+    [HttpGet("config")]
+    public ActionResult<string> GetConfigValue()
+    {
+        var value = _configuration["key1"];
+        var subkey2 = _configuration["section1:subkey2"];
+        return $"{value} - {subkey2}" ?? "Key not found";
+    }
 
     [HttpGet]
     public ActionResult<IEnumerable<Category>> Get()
@@ -25,6 +34,7 @@ public class CategoriesController(AppDbContext context) : ControllerBase
     [HttpGet("{id:int:min(1)}", Name = "GetCategoryById")]
     public ActionResult<Category> Get(int id)
     {
+        //throw new Exception("Test exception handling middleware");
         var category = _context.Categories.FirstOrDefault(c => c.CategoryId == id);
         if (category is null)
         {
