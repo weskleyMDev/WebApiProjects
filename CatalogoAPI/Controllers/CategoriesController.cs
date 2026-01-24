@@ -1,4 +1,5 @@
 using CatalogoAPI.Context;
+using CatalogoAPI.Filter;
 using CatalogoAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,10 +8,11 @@ namespace CatalogoAPI.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class CategoriesController(AppDbContext context, IConfiguration configuration) : ControllerBase
+public class CategoriesController(AppDbContext context, IConfiguration configuration, ILogger<CategoriesController> logger) : ControllerBase
 {
     private readonly AppDbContext _context = context;
     private readonly IConfiguration _configuration = configuration;
+    private readonly ILogger<CategoriesController> _logger = logger;
 
     [HttpGet("config")]
     public ActionResult<string> GetConfigValue()
@@ -21,9 +23,10 @@ public class CategoriesController(AppDbContext context, IConfiguration configura
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Category>> Get()
+    [ServiceFilter(typeof(ApiLoggingFilter))]
+    public async Task<ActionResult<IEnumerable<Category>>> Get()
     {
-        var categories = _context.Categories.Take(10).ToList();
+        var categories = await _context.Categories.Take(10).ToListAsync();
         if (categories is null)
         {
             return NotFound();
@@ -46,6 +49,7 @@ public class CategoriesController(AppDbContext context, IConfiguration configura
     [HttpGet("products")]
     public ActionResult<IEnumerable<Category>> GetCategoriesWithProducts()
     {
+        _logger.LogInformation("##### Getting categories with products #####");
         var categories = _context.Categories.Include(c => c.Products).Where(c => c.CategoryId <= 5).ToList();
         if (categories is null)
         {
