@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using CatalogoAPI.Context;
 using CatalogoAPI.Extensions;
 using CatalogoAPI.Filter;
+using CatalogoAPI.Logging;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,11 @@ string mySqlConnection = builder.Configuration.GetConnectionString("DefaultConne
 builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
 
 builder.Services.AddScoped<ApiLoggingFilter>();
+
+builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
+{
+    LogLevel = LogLevel.Information,
+}));
 
 var app = builder.Build();
 
