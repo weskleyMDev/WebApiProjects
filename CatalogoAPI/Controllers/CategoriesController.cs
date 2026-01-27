@@ -1,6 +1,7 @@
 using CatalogoAPI.Context;
 using CatalogoAPI.Filter;
 using CatalogoAPI.Models;
+using CatalogoAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,9 +9,9 @@ namespace CatalogoAPI.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class CategoriesController(AppDbContext context, IConfiguration configuration, ILogger<CategoriesController> logger) : ControllerBase
+public class CategoriesController(ICategoryRepository repository, IConfiguration configuration, ILogger<CategoriesController> logger) : ControllerBase
 {
-    private readonly AppDbContext _context = context;
+    private readonly ICategoryRepository _repository = repository;
     private readonly IConfiguration _configuration = configuration;
     private readonly ILogger<CategoriesController> _logger = logger;
 
@@ -24,29 +25,28 @@ public class CategoriesController(AppDbContext context, IConfiguration configura
 
     [HttpGet]
     [ServiceFilter(typeof(ApiLoggingFilter))]
-    public async Task<ActionResult<IEnumerable<Category>>> Get()
+    public ActionResult<IEnumerable<Category>> Get()
     {
-        var categories = await _context.Categories.Take(10).ToListAsync();
+        var categories = _repository.GetCategories();
         if (categories is null)
         {
-            return NotFound();
+            return NotFound("No categories found!");
         }
-        return categories;
+        return Ok(categories);
     }
 
     [HttpGet("{id:int:min(1)}", Name = "GetCategoryById")]
     public ActionResult<Category> Get(int id)
     {
-        //throw new Exception("Test exception handling middleware");
-        var category = _context.Categories.FirstOrDefault(c => c.CategoryId == id);
+        var category = _repository.GetCategoryById(id);
         if (category is null)
         {
             return NotFound($"Category {id} not found!");
         }
-        return category;
+        return Ok(category);
     }
 
-    [HttpGet("products")]
+    /* [HttpGet("products")]
     public ActionResult<IEnumerable<Category>> GetCategoriesWithProducts()
     {
         _logger.LogInformation("##### Getting categories with products #####");
@@ -56,18 +56,17 @@ public class CategoriesController(AppDbContext context, IConfiguration configura
             return NotFound();
         }
         return categories;
-    }
+    } */
 
     [HttpPost]
     public ActionResult Post(Category category)
     {
         if (category is null)
         {
-            return BadRequest();
+            return BadRequest("Invalid category data.");
         }
-        _context.Categories.Add(category);
-        _context.SaveChanges();
-        return new CreatedAtRouteResult("GetCategoryById", new { id = category.CategoryId }, category);
+        var newCategory = _repository.AddCategory(category);
+        return new CreatedAtRouteResult("GetCategoryById", new { id = newCategory.CategoryId }, newCategory);
     }
 
     [HttpPut("{id:int:min(1)}")]
@@ -75,24 +74,22 @@ public class CategoriesController(AppDbContext context, IConfiguration configura
     {
         if (id != category.CategoryId)
         {
-            return BadRequest();
+            return BadRequest("ID mismatch or Invalid category data.");
         }
-        _context.Entry(category).State = EntityState.Modified;
-        _context.SaveChanges();
-        return Ok(category);
+        var updatedCategory = _repository.UpdateCategory(category);
+        return Ok(updatedCategory);
     }
 
     [HttpDelete("{id:int:min(1)}")]
     public ActionResult Delete(int id)
     {
-        var category = _context.Categories.FirstOrDefault(c => c.CategoryId == id);
+        var category = _repository.GetCategoryById(id);
         if (category is null)
         {
-            return NotFound("Category not found!");
+            return NotFound($"Category {id} not found!");
         }
-        _context.Categories.Remove(category);
-        _context.SaveChanges();
-        return Ok(category);
+        var deletedCategory = _repository.DeleteCategory(id);
+        return Ok(deletedCategory);
     }
 
 }
