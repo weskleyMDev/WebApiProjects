@@ -1,3 +1,5 @@
+using CatalogoAPI.DTOs;
+using CatalogoAPI.DTOs.Mappings;
 using CatalogoAPI.Filter;
 using CatalogoAPI.Models;
 using CatalogoAPI.Repositories;
@@ -7,9 +9,9 @@ namespace CatalogoAPI.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class CategoriesController(IRepository<Category> repository, IConfiguration configuration, ILogger<CategoriesController> logger) : ControllerBase
+public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger<CategoriesController> logger) : ControllerBase
 {
-    private readonly IRepository<Category> _repository = repository;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IConfiguration _configuration = configuration;
     private readonly ILogger<CategoriesController> _logger = logger;
 
@@ -23,60 +25,82 @@ public class CategoriesController(IRepository<Category> repository, IConfigurati
 
     [HttpGet]
     [ServiceFilter(typeof(ApiLoggingFilter))]
-    public ActionResult<IEnumerable<Category>> Get()
+    public ActionResult<IEnumerable<CategoryDTO>> Get()
     {
-        var categories = _repository.GetAll();
+        var categories = _unitOfWork.CategoryRepository.GetAll();
         if (categories is null)
         {
             return NotFound("No categories found!");
         }
-        return Ok(categories);
+
+        var categoriesDTO = categories.ToDTOs();
+
+        return Ok(categoriesDTO);
     }
 
     [HttpGet("{id:int:min(1)}", Name = "GetCategoryById")]
-    public ActionResult<Category> Get(int id)
+    public ActionResult<CategoryDTO> Get(int id)
     {
-        var category = _repository.GetById(c => c.CategoryId == id);
+        var category = _unitOfWork.CategoryRepository.GetById(c => c.CategoryId == id);
         if (category is null)
         {
             return NotFound($"Category {id} not found!");
         }
-        return Ok(category);
+
+        var categoryDTO = category.ToDTO();
+
+        return Ok(categoryDTO);
     }
     
 
     [HttpPost]
-    public ActionResult Post(Category category)
+    public ActionResult<CategoryDTO> Post(CategoryDTO categoryDTO)
     {
-        if (category is null)
+        if (categoryDTO is null)
         {
             return BadRequest("Invalid category data.");
         }
-        var newCategory = _repository.Add(category);
-        return new CreatedAtRouteResult("GetCategoryById", new { id = newCategory.CategoryId }, newCategory);
+        var category = categoryDTO.ToEntity();
+
+        var newCategory = _unitOfWork.CategoryRepository.Add(category!);
+        _unitOfWork.Commit();
+
+        var newCategoryDTO = newCategory.ToDTO();
+
+        return new CreatedAtRouteResult("GetCategoryById", new { id = newCategoryDTO!.CategoryId }, newCategoryDTO);
     }
 
     [HttpPut("{id:int:min(1)}")]
-    public ActionResult Put(int id, Category category)
+    public ActionResult<CategoryDTO> Put(int id, CategoryDTO categoryDTO)
     {
-        if (id != category.CategoryId)
+        if (id != categoryDTO.CategoryId)
         {
             return BadRequest("ID mismatch or Invalid category data.");
         }
-        var updatedCategory = _repository.Update(category);
-        return Ok(updatedCategory);
+
+        var category = categoryDTO.ToEntity();
+
+        var updatedCategory = _unitOfWork.CategoryRepository.Update(category!);
+        _unitOfWork.Commit();
+
+        var updatedCategoryDTO = updatedCategory.ToDTO();
+
+        return Ok(updatedCategoryDTO);
     }
 
     [HttpDelete("{id:int:min(1)}")]
-    public ActionResult Delete(int id)
+    public ActionResult<CategoryDTO> Delete(int id)
     {
-        var category = _repository.GetById(c => c.CategoryId == id);
+        var category = _unitOfWork.CategoryRepository.GetById(c => c.CategoryId == id);
         if (category is null)
         {
             return NotFound($"Category {id} not found!");
         }
-        var deletedCategory = _repository.Delete(category);
-        return Ok(deletedCategory);
+        var deletedCategory = _unitOfWork.CategoryRepository.Delete(category);
+        _unitOfWork.Commit();
+
+        var deletedCategoryDTO = deletedCategory.ToDTO();
+        return Ok(deletedCategoryDTO);
     }
 
 }

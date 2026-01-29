@@ -22,6 +22,7 @@ public class Product // : IValidatableObject
 
     [Required]
     [Range(1, 999.99, ErrorMessage = "The Price must be between {1} and {2}")]
+    [Column(TypeName = "decimal(10,2)")]
     public decimal Price { get; set; }
 
     [Required]
