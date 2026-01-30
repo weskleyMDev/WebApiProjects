@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using CatalogoAPI.Context;
+using CatalogoAPI.DTOs.Mappings;
 using CatalogoAPI.Extensions;
 using CatalogoAPI.Filter;
 using CatalogoAPI.Logging;
@@ -15,7 +16,7 @@ builder.Services.AddControllers(options =>
     options.Filters.Add(typeof(ApiExceptionFilter));
 }).AddJsonOptions(options =>
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
-);
+).AddNewtonsoftJson();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -29,6 +30,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddAutoMapper(typeof(ProductDTOMappingProfile));
 
 builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
 {
