@@ -1,9 +1,11 @@
 using AutoMapper;
 using CatalogoAPI.DTOs;
 using CatalogoAPI.Models;
+using CatalogoAPI.Pagination;
 using CatalogoAPI.Repositories;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace CatalogoAPI.Controllers;
 
@@ -13,6 +15,28 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IMapper _mapper = mapper;
+
+    [HttpGet("paginated")]
+    public ActionResult<IEnumerable<ProductDTO>> GetProductsPaginated([FromQuery] ProductsParameters productsParameters)
+    {
+        var products = _unitOfWork.ProductRepository.GetProducts(productsParameters);
+        if (products is null)
+        {
+            return NotFound("No products found!");
+        }
+        var metadata = new
+        {
+            products.TotalCount,
+            products.PageSize,
+            products.CurrentPage,
+            products.TotalPages,
+            products.HasNext,
+            products.HasPrevious
+        };
+        Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+        var productsDTO = _mapper.Map<IEnumerable<ProductDTO>>(products);
+        return Ok(productsDTO);
+    }
 
     [HttpGet]
     public ActionResult<IEnumerable<ProductDTO>> GetProducts()

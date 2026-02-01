@@ -2,8 +2,10 @@ using CatalogoAPI.DTOs;
 using CatalogoAPI.DTOs.Mappings;
 using CatalogoAPI.Filter;
 using CatalogoAPI.Models;
+using CatalogoAPI.Pagination;
 using CatalogoAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace CatalogoAPI.Controllers;
 
@@ -38,6 +40,28 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
         return Ok(categoriesDTO);
     }
 
+    [HttpGet("paginated")]
+    public ActionResult<IEnumerable<CategoryDTO>> GetPaginated([FromQuery] CategoriesParameters categoriesParameters)
+    {
+        var categories = _unitOfWork.CategoryRepository.GetCategories(categoriesParameters);
+        if (categories is null)
+        {
+            return NotFound("No categories found!");
+        }
+        var metadata = new
+        {
+            categories.TotalCount,
+            categories.PageSize,
+            categories.CurrentPage,
+            categories.TotalPages,
+            categories.HasNext,
+            categories.HasPrevious
+        };
+        Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+        var categoriesDTO = categories.ToDTOs();
+        return Ok(categoriesDTO);
+    }
+
     [HttpGet("{id:int:min(1)}", Name = "GetCategoryById")]
     public ActionResult<CategoryDTO> Get(int id)
     {
@@ -51,7 +75,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
 
         return Ok(categoryDTO);
     }
-    
+
 
     [HttpPost]
     public ActionResult<CategoryDTO> Post(CategoryDTO categoryDTO)
