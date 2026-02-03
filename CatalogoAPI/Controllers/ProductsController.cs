@@ -2,7 +2,7 @@ using AutoMapper;
 using CatalogoAPI.DTOs;
 using CatalogoAPI.Models;
 using CatalogoAPI.Pagination;
-using CatalogoAPI.Repositories;
+using CatalogoAPI.Repositories.Interfaces;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -24,6 +24,23 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
         {
             return NotFound("No products found!");
         }
+        
+        return GetProductsDTO(products);
+    }
+
+    [HttpGet("filter/price/paginated")]
+    public ActionResult<IEnumerable<ProductDTO>> GetProductsByPrice([FromQuery] ProductsFilterPrice productsFilterPrice)
+    {
+        var products = _unitOfWork.ProductRepository.GetProductsByPrice(productsFilterPrice);
+        if (products is null)
+        {
+            return NotFound("No products found!");
+        }
+        return GetProductsDTO(products);
+    }
+
+    private ActionResult<IEnumerable<ProductDTO>> GetProductsDTO(PagedList<Product> products)
+    {
         var metadata = new
         {
             products.TotalCount,

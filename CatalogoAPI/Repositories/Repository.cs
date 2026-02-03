@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using CatalogoAPI.Context;
+using CatalogoAPI.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace CatalogoAPI.Repositories;

@@ -3,7 +3,7 @@ using CatalogoAPI.DTOs.Mappings;
 using CatalogoAPI.Filter;
 using CatalogoAPI.Models;
 using CatalogoAPI.Pagination;
-using CatalogoAPI.Repositories;
+using CatalogoAPI.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -48,6 +48,24 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
         {
             return NotFound("No categories found!");
         }
+        
+        return GetCategoriesDTO(categories);
+    }
+
+    [HttpGet("filter/name/paginated")]
+    public ActionResult<IEnumerable<CategoryDTO>> GetCategoriesByName([FromQuery] CategoriesFilterName categoriesFilterName)
+    {
+        var categories = _unitOfWork.CategoryRepository.GetCategoriesByName(categoriesFilterName);
+        if (categories is null)
+        {
+            return NotFound("No categories found!");
+        }
+        
+        return GetCategoriesDTO(categories);
+    }
+
+    private ActionResult<IEnumerable<CategoryDTO>> GetCategoriesDTO(PagedList<Category> categories)
+    {
         var metadata = new
         {
             categories.TotalCount,

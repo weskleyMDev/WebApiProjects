@@ -1,4 +1,4 @@
-namespace CatalogoAPI.Repositories;
+namespace CatalogoAPI.Repositories.Interfaces;
 
 public interface IUnitOfWork
 {

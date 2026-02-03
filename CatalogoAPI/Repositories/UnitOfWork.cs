@@ -1,4 +1,5 @@
 using CatalogoAPI.Context;
+using CatalogoAPI.Repositories.Interfaces;
 
 namespace CatalogoAPI.Repositories;
 

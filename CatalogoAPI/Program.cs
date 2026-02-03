@@ -5,6 +5,7 @@ using CatalogoAPI.Extensions;
 using CatalogoAPI.Filter;
 using CatalogoAPI.Logging;
 using CatalogoAPI.Repositories;
+using CatalogoAPI.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
