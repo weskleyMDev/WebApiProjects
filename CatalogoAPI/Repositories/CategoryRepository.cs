@@ -7,15 +7,15 @@ namespace CatalogoAPI.Repositories;
 
 public class CategoryRepository(AppDbContext context) : Repository<Category>(context), ICategoryRepository
 {
-    public PagedList<Category> GetCategories(CategoriesParameters categoriesParameters)
+    public async Task<PagedList<Category>> GetCategoriesAsync(CategoriesParameters categoriesParameters)
     {
-        var source = GetAll().OrderBy(c => c.CategoryId).AsQueryable();
+        var source = (await GetAllAsync()).OrderBy(c => c.CategoryId).AsQueryable();
         return PagedList<Category>.ToPagedList(source, categoriesParameters.PageNumber, categoriesParameters.PageSize);
     }
 
-    public PagedList<Category> GetCategoriesByName(CategoriesFilterName categoriesFilterName)
+    public async Task<PagedList<Category>> GetCategoriesByNameAsync(CategoriesFilterName categoriesFilterName)
     {
-        var categories = GetAll().AsQueryable();
+        var categories = (await GetAllAsync()).AsQueryable();
         if (!string.IsNullOrEmpty(categoriesFilterName.Name))
         {
             categories = categories.Where(c => c.Name != null && c.Name.Contains(categoriesFilterName.Name, StringComparison.CurrentCultureIgnoreCase));

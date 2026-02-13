@@ -27,9 +27,9 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
 
     [HttpGet]
     [ServiceFilter(typeof(ApiLoggingFilter))]
-    public ActionResult<IEnumerable<CategoryDTO>> Get()
+    public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get()
     {
-        var categories = _unitOfWork.CategoryRepository.GetAll();
+        var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
         if (categories is null)
         {
             return NotFound("No categories found!");
@@ -41,26 +41,26 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
     }
 
     [HttpGet("paginated")]
-    public ActionResult<IEnumerable<CategoryDTO>> GetPaginated([FromQuery] CategoriesParameters categoriesParameters)
+    public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetPaginated([FromQuery] CategoriesParameters categoriesParameters)
     {
-        var categories = _unitOfWork.CategoryRepository.GetCategories(categoriesParameters);
+        var categories = await _unitOfWork.CategoryRepository.GetCategoriesAsync(categoriesParameters);
         if (categories is null)
         {
             return NotFound("No categories found!");
         }
-        
+
         return GetCategoriesDTO(categories);
     }
 
     [HttpGet("filter/name/paginated")]
-    public ActionResult<IEnumerable<CategoryDTO>> GetCategoriesByName([FromQuery] CategoriesFilterName categoriesFilterName)
+    public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesByName([FromQuery] CategoriesFilterName categoriesFilterName)
     {
-        var categories = _unitOfWork.CategoryRepository.GetCategoriesByName(categoriesFilterName);
+        var categories = await _unitOfWork.CategoryRepository.GetCategoriesByNameAsync(categoriesFilterName);
         if (categories is null)
         {
             return NotFound("No categories found!");
         }
-        
+
         return GetCategoriesDTO(categories);
     }
 
@@ -81,9 +81,9 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
     }
 
     [HttpGet("{id:int:min(1)}", Name = "GetCategoryById")]
-    public ActionResult<CategoryDTO> Get(int id)
+    public async Task<ActionResult<CategoryDTO>> Get(int id)
     {
-        var category = _unitOfWork.CategoryRepository.GetById(c => c.CategoryId == id);
+        var category = await _unitOfWork.CategoryRepository.GetByIdAsync(c => c.CategoryId == id);
         if (category is null)
         {
             return NotFound($"Category {id} not found!");
@@ -96,7 +96,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
 
 
     [HttpPost]
-    public ActionResult<CategoryDTO> Post(CategoryDTO categoryDTO)
+    public async Task<ActionResult<CategoryDTO>> Post(CategoryDTO categoryDTO)
     {
         if (categoryDTO is null)
         {
@@ -105,7 +105,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
         var category = categoryDTO.ToEntity();
 
         var newCategory = _unitOfWork.CategoryRepository.Add(category!);
-        _unitOfWork.Commit();
+        await _unitOfWork.CommitAsync();
 
         var newCategoryDTO = newCategory.ToDTO();
 
@@ -113,7 +113,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
     }
 
     [HttpPut("{id:int:min(1)}")]
-    public ActionResult<CategoryDTO> Put(int id, CategoryDTO categoryDTO)
+    public async Task<ActionResult<CategoryDTO>> Put(int id, CategoryDTO categoryDTO)
     {
         if (id != categoryDTO.CategoryId)
         {
@@ -123,7 +123,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
         var category = categoryDTO.ToEntity();
 
         var updatedCategory = _unitOfWork.CategoryRepository.Update(category!);
-        _unitOfWork.Commit();
+        await _unitOfWork.CommitAsync();
 
         var updatedCategoryDTO = updatedCategory.ToDTO();
 
@@ -131,15 +131,15 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
     }
 
     [HttpDelete("{id:int:min(1)}")]
-    public ActionResult<CategoryDTO> Delete(int id)
+    public async Task<ActionResult<CategoryDTO>> Delete(int id)
     {
-        var category = _unitOfWork.CategoryRepository.GetById(c => c.CategoryId == id);
+        var category = await _unitOfWork.CategoryRepository.GetByIdAsync(c => c.CategoryId == id);
         if (category is null)
         {
             return NotFound($"Category {id} not found!");
         }
         var deletedCategory = _unitOfWork.CategoryRepository.Delete(category);
-        _unitOfWork.Commit();
+        await _unitOfWork.CommitAsync();
 
         var deletedCategoryDTO = deletedCategory.ToDTO();
         return Ok(deletedCategoryDTO);

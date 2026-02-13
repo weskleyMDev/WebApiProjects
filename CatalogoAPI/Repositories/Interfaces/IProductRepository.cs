@@ -6,7 +6,7 @@ namespace CatalogoAPI.Repositories.Interfaces;
 public interface IProductRepository : IRepository<Product>
 {
     // IEnumerable<Product> GetProducts(ProductsParameters productsParameters);
-    PagedList<Product> GetProducts(ProductsParameters productsParameters);
-    PagedList<Product> GetProductsByPrice(ProductsFilterPrice productsFilterPrice);
-    IEnumerable<Product> GetProductsByCategoryId(int categoryId);
+    Task<PagedList<Product>> GetProductsAsync(ProductsParameters productsParameters);
+    Task<PagedList<Product>> GetProductsByPriceAsync(ProductsFilterPrice productsFilterPrice);
+    Task<IEnumerable<Product>> GetProductsByCategoryIdAsync(int categoryId);
 }

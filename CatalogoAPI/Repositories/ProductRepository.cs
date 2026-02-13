@@ -12,20 +12,20 @@ public class ProductRepository(AppDbContext context) : Repository<Product>(conte
         return [.. GetAll().OrderBy(p => p.Name).Skip((productsParameters.PageNumber - 1) * productsParameters.PageSize).Take(productsParameters.PageSize)];
     } */
 
-    public PagedList<Product> GetProducts(ProductsParameters productsParameters)
+    public async Task<PagedList<Product>> GetProductsAsync(ProductsParameters productsParameters)
     {
-        var source = GetAll().OrderBy(p => p.ProductId).AsQueryable();
+        var source = (await GetAllAsync()).OrderBy(p => p.ProductId).AsQueryable();
         return PagedList<Product>.ToPagedList(source, productsParameters.PageNumber, productsParameters.PageSize);
     }
 
-    public IEnumerable<Product> GetProductsByCategoryId(int categoryId)
+    public async Task<IEnumerable<Product>> GetProductsByCategoryIdAsync(int categoryId)
     {
-        return GetAll().Where(p => p.CategoryId == categoryId);
+        return (await GetAllAsync()).Where(p => p.CategoryId == categoryId);
     }
 
-    public PagedList<Product> GetProductsByPrice(ProductsFilterPrice productsFilterPrice)
+    public async Task<PagedList<Product>> GetProductsByPriceAsync(ProductsFilterPrice productsFilterPrice)
     {
-        var products = GetAll().AsQueryable();
+        var products = (await GetAllAsync()).AsQueryable();
 
         if (productsFilterPrice.Price.HasValue && !string.IsNullOrEmpty(productsFilterPrice.PriceFilter))
         {
