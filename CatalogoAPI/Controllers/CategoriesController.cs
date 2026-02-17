@@ -4,6 +4,7 @@ using CatalogoAPI.Filter;
 using CatalogoAPI.Models;
 using CatalogoAPI.Pagination;
 using CatalogoAPI.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using X.PagedList;
@@ -28,6 +29,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
 
     [HttpGet]
     [ServiceFilter(typeof(ApiLoggingFilter))]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get()
     {
         var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
