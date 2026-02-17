@@ -1,11 +1,12 @@
 using CatalogoAPI.Models;
 using CatalogoAPI.Pagination;
+using X.PagedList;
 
 namespace CatalogoAPI.Repositories.Interfaces;
 
 public interface ICategoryRepository : IRepository<Category>
 {
-    Task<PagedList<Category>> GetCategoriesAsync(CategoriesParameters categoriesParameters);
+    Task<IPagedList<Category>> GetCategoriesAsync(CategoriesParameters categoriesParameters);
 
-    Task<PagedList<Category>> GetCategoriesByNameAsync(CategoriesFilterName categoriesFilterName);
+    Task<IPagedList<Category>> GetCategoriesByNameAsync(CategoriesFilterName categoriesFilterName);
 }

@@ -6,6 +6,7 @@ using CatalogoAPI.Repositories.Interfaces;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using X.PagedList;
 
 namespace CatalogoAPI.Controllers;
 
@@ -39,16 +40,16 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
         return GetProductsDTO(products);
     }
 
-    private ActionResult<IEnumerable<ProductDTO>> GetProductsDTO(PagedList<Product> products)
+    private ActionResult<IEnumerable<ProductDTO>> GetProductsDTO(IPagedList<Product> products)
     {
         var metadata = new
         {
-            products.TotalCount,
+            products.Count,
             products.PageSize,
-            products.CurrentPage,
-            products.TotalPages,
-            products.HasNext,
-            products.HasPrevious
+            products.PageCount,
+            products.TotalItemCount,
+            products.HasNextPage,
+            products.HasPreviousPage
         };
         Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
         var productsDTO = _mapper.Map<IEnumerable<ProductDTO>>(products);

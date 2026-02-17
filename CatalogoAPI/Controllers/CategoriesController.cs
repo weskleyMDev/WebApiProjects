@@ -6,6 +6,7 @@ using CatalogoAPI.Pagination;
 using CatalogoAPI.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using X.PagedList;
 
 namespace CatalogoAPI.Controllers;
 
@@ -64,16 +65,16 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
         return GetCategoriesDTO(categories);
     }
 
-    private ActionResult<IEnumerable<CategoryDTO>> GetCategoriesDTO(PagedList<Category> categories)
+    private ActionResult<IEnumerable<CategoryDTO>> GetCategoriesDTO(IPagedList<Category> categories)
     {
         var metadata = new
         {
-            categories.TotalCount,
+            categories.Count,
             categories.PageSize,
-            categories.CurrentPage,
-            categories.TotalPages,
-            categories.HasNext,
-            categories.HasPrevious
+            categories.PageCount,
+            categories.TotalItemCount,
+            categories.HasNextPage,
+            categories.HasPreviousPage
         };
         Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
         var categoriesDTO = categories.ToDTOs();
