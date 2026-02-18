@@ -27,9 +27,9 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
         return $"{value} - {subkey2}" ?? "Key not found";
     }
 
+    [Authorize]
     [HttpGet]
     [ServiceFilter(typeof(ApiLoggingFilter))]
-    [Authorize]
     public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get()
     {
         var categories = await _unitOfWork.CategoryRepository.GetAllAsync();

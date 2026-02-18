@@ -3,6 +3,7 @@ using CatalogoAPI.DTOs;
 using CatalogoAPI.Models;
 using CatalogoAPI.Pagination;
 using CatalogoAPI.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -25,7 +26,7 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
         {
             return NotFound("No products found!");
         }
-        
+
         return GetProductsDTO(products);
     }
 
@@ -56,6 +57,7 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
         return Ok(productsDTO);
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProducts()
     {
