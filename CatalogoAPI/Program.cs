@@ -64,7 +64,6 @@ builder.Services.AddSwaggerGen(
 
 var secretKey = builder.Configuration["JWT:SecretKey"] ?? throw new InvalidOperationException("JWT Secret Key not found in configuration.");
 
-builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(
     options =>
     {
@@ -89,6 +88,19 @@ builder.Services.AddAuthentication(
         };
     }
 );
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
+    options.AddPolicy("SuperAdminOnly", policy =>
+        policy.RequireRole("admin").RequireClaim("id", "test"));
+    options.AddPolicy("UserOnly", policy => policy.RequireRole("user"));
+    options.AddPolicy("ExclusiveOnly", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(claim =>
+                claim.Type == "id" && claim.Value == "test") ||
+                context.User.IsInRole("SuperAdmin")));
+});
 
 builder.Services
     .AddIdentityCore<ApplicationUser>()

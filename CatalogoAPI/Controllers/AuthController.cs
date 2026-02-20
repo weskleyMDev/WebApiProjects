@@ -21,6 +21,7 @@ public class AuthController(ITokenService tokenService, UserManager<ApplicationU
 
     [HttpPost]
     [Route("create-role")]
+    [Authorize(Policy = "SuperAdminOnly")]
     public async Task<IActionResult> CreateRole(string roleName)
     {
         var roleExists = await _roleManager.RoleExistsAsync(roleName);
@@ -43,6 +44,7 @@ public class AuthController(ITokenService tokenService, UserManager<ApplicationU
 
     [HttpPost]
     [Route("assign-role")]
+    [Authorize(Policy = "SuperAdminOnly")]
     public async Task<IActionResult> AssignRole(string email, string roleName)
     {
         var user = await _userManager.FindByEmailAsync(email.ToLower());
@@ -87,6 +89,7 @@ public class AuthController(ITokenService tokenService, UserManager<ApplicationU
             {
                 new(ClaimTypes.Name, user.UserName!),
                 new(ClaimTypes.Email, user.Email!),
+                new("id", user.UserName!),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
             foreach (var userRole in roles)
@@ -163,9 +166,9 @@ public class AuthController(ITokenService tokenService, UserManager<ApplicationU
         });
     }
 
-    [Authorize]
     [HttpPost]
     [Route("revoke/{username}")]
+    [Authorize(Policy = "ExclusiveOnly")]
     public async Task<IActionResult> Revoke(string username)
     {
         var user = await _userManager.FindByNameAsync(username);

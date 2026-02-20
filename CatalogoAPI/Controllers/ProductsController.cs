@@ -57,8 +57,8 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
         return Ok(productsDTO);
     }
 
-    [Authorize]
     [HttpGet]
+    [Authorize(Policy = "UserOnly")]
     public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProducts()
     {
         var products = await _unitOfWork.ProductRepository.GetAllAsync();
