@@ -89,17 +89,28 @@ builder.Services.AddAuthentication(
     }
 );
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
-    options.AddPolicy("SuperAdminOnly", policy =>
-        policy.RequireRole("admin").RequireClaim("id", "test"));
-    options.AddPolicy("UserOnly", policy => policy.RequireRole("user"));
-    options.AddPolicy("ExclusiveOnly", policy =>
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("AdminOnly", policy => policy.RequireRole("admin"))
+    .AddPolicy("SuperAdminOnly", policy =>
+        policy.RequireRole("admin").RequireClaim("id", "test"))
+    .AddPolicy("UserOnly", policy => policy.RequireRole("user"))
+    .AddPolicy("ExclusiveOnly", policy =>
         policy.RequireAssertion(context =>
             context.User.HasClaim(claim =>
                 claim.Type == "id" && claim.Value == "test") ||
                 context.User.IsInRole("SuperAdmin")));
+
+//var originsAllowedAccess = "_originsAllowedAccess";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(
+        name: "_originsAllowedAccess",
+        policy =>
+        {
+            policy.WithOrigins("https://apirequest.io")
+                .WithMethods("GET")
+                .AllowAnyHeader();
+        });
 });
 
 builder.Services
@@ -136,6 +147,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthorization();
 

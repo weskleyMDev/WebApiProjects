@@ -5,12 +5,14 @@ using CatalogoAPI.Models;
 using CatalogoAPI.Pagination;
 using CatalogoAPI.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using X.PagedList;
 
 namespace CatalogoAPI.Controllers;
 
+[EnableCors("_originsAllowedAccess")]
 [Route("[controller]")]
 [ApiController]
 public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger<CategoriesController> logger) : ControllerBase
@@ -27,7 +29,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
         return $"{value} - {subkey2}" ?? "Key not found";
     }
 
-    [Authorize]
+    // [Authorize]
     [HttpGet]
     [ServiceFilter(typeof(ApiLoggingFilter))]
     public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get()
@@ -83,6 +85,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
         return Ok(categoriesDTO);
     }
 
+    [DisableCors]
     [HttpGet("{id:int:min(1)}", Name = "GetCategoryById")]
     public async Task<ActionResult<CategoryDTO>> Get(int id)
     {
@@ -98,6 +101,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
     }
 
 
+    [DisableCors]
     [HttpPost]
     public async Task<ActionResult<CategoryDTO>> Post(CategoryDTO categoryDTO)
     {
@@ -115,6 +119,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
         return new CreatedAtRouteResult("GetCategoryById", new { id = newCategoryDTO!.CategoryId }, newCategoryDTO);
     }
 
+    [DisableCors]
     [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult<CategoryDTO>> Put(int id, CategoryDTO categoryDTO)
     {
@@ -133,6 +138,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
         return Ok(updatedCategoryDTO);
     }
 
+    [DisableCors]
     [HttpDelete("{id:int:min(1)}")]
     [Authorize(Policy = "AdminOnly")]
     public async Task<ActionResult<CategoryDTO>> Delete(int id)
