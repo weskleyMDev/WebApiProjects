@@ -7,12 +7,14 @@ using CatalogoAPI.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Newtonsoft.Json;
 using X.PagedList;
 
 namespace CatalogoAPI.Controllers;
 
 [EnableCors("_originsAllowedAccess")]
+// [EnableRateLimiting("_fixed")]
 [Route("[controller]")]
 [ApiController]
 public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger<CategoriesController> logger) : ControllerBase
@@ -32,6 +34,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
     // [Authorize]
     [HttpGet]
     [ServiceFilter(typeof(ApiLoggingFilter))]
+    [DisableRateLimiting]
     public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get()
     {
         var categories = await _unitOfWork.CategoryRepository.GetAllAsync();

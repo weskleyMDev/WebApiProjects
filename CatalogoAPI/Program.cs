@@ -1,16 +1,19 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using CatalogoAPI.Context;
 using CatalogoAPI.DTOs.Mappings;
 using CatalogoAPI.Extensions;
 using CatalogoAPI.Filter;
 using CatalogoAPI.Logging;
 using CatalogoAPI.Models;
+using CatalogoAPI.RateLimitOptions;
 using CatalogoAPI.Repositories;
 using CatalogoAPI.Repositories.Interfaces;
 using CatalogoAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -113,6 +116,34 @@ builder.Services.AddCors(options =>
         });
 });
 
+var myRateLimitingOptions = new RateLimitOptions();
+builder.Configuration.GetSection(RateLimitOptions.MyRateLimiting).Bind(myRateLimitingOptions);
+
+builder.Services.AddRateLimiter(options =>
+{
+    /* options.AddFixedWindowLimiter("_fixed", limiter =>
+    {
+        limiter.PermitLimit = 1;
+        limiter.Window = TimeSpan.FromSeconds(5);
+        limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiter.QueueLimit = 2;
+    }); */
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+    {
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.User.Identity?.Name ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+            factory: partition => new FixedWindowRateLimiterOptions
+            {
+                // PermitLimit = 2,
+                PermitLimit = myRateLimitingOptions.PermitLimit,
+                Window = TimeSpan.FromSeconds(myRateLimitingOptions.Window),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = myRateLimitingOptions.QueueLimit
+            });
+    });
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
+
 builder.Services
     .AddIdentityCore<ApplicationUser>()
     .AddRoles<IdentityRole>()
@@ -147,6 +178,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRateLimiter();
 
 app.UseCors();
 
