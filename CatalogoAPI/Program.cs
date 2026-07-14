@@ -1,6 +1,8 @@
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
+using Asp.Versioning;
 using CatalogoAPI.Context;
 using CatalogoAPI.DTOs.Mappings;
 using CatalogoAPI.Extensions;
@@ -33,7 +35,28 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(
     c =>
     {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "CatalogoAPI", Version = "v1" });
+        // c.SwaggerDoc("v1", new OpenApiInfo { Title = "CatalogoAPI", Version = "v1" });
+        c.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Version = "v1",
+            Title = "CatalogoAPI",
+            Description = "API de catálogo de produtos",
+            TermsOfService = new Uri("https://example.com/terms"),
+            Contact = new OpenApiContact
+            {
+                Name = "Wesley Klug",
+                Email = "wesley.klug@example.com",
+                Url = new Uri("https://example.com/contact")
+            },
+            License = new OpenApiLicense
+            {
+                Name = "Use under LICX",
+                Url = new Uri("https://example.com/license")
+            }
+        }
+        );
+        var xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFileName));
         c.AddSecurityDefinition(
             "Bearer",
             new OpenApiSecurityScheme()
@@ -150,6 +173,21 @@ builder.Services
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = ApiVersionReader.Combine(
+        new QueryStringApiVersionReader(),
+        new UrlSegmentApiVersionReader()
+    );
+}).AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+});
+
 string mySqlConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
@@ -173,7 +211,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    // app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "CatalogoAPI");
+    });
     app.ConfigureExceptionHandler();
 }
 

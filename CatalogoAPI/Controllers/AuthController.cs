@@ -11,6 +11,8 @@ namespace CatalogoAPI.Controllers;
 
 [Route("[controller]")]
 [ApiController]
+// ignore this controller in Swagger UI
+// [ApiExplorerSettings(IgnoreApi = true)]
 public class AuthController(ITokenService tokenService, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, ILogger<AuthController> logger) : ControllerBase
 {
     private readonly ITokenService _tokenService = tokenService;

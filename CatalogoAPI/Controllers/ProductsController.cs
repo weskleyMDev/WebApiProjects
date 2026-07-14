@@ -13,6 +13,8 @@ namespace CatalogoAPI.Controllers;
 
 [Route("[controller]")]
 [ApiController]
+// ignore this controller in Swagger UI
+// [ApiExplorerSettings(IgnoreApi = true)]
 public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
@@ -57,6 +59,10 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
         return Ok(productsDTO);
     }
 
+    /// <summary>
+    /// Get all products
+    /// </summary>
+    /// <returns>A list of products</returns>
     [HttpGet]
     [Authorize(Policy = "UserOnly")]
     public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProducts()
@@ -70,6 +76,11 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
         return Ok(productsDTO);
     }
 
+    /// <summary>
+    /// Get a product by its ID
+    /// </summary>
+    /// <param name="id">Product ID</param>
+    /// <returns>A product with the specified ID</returns>
     [HttpGet("{id:int:min(1)}", Name = "GetProductById")]
     public async Task<ActionResult<ProductDTO>> GetProduct(int id)
     {

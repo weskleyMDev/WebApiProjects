@@ -17,6 +17,8 @@ namespace CatalogoAPI.Controllers;
 // [EnableRateLimiting("_fixed")]
 [Route("[controller]")]
 [ApiController]
+// ignore this controller in Swagger UI
+// [ApiExplorerSettings(IgnoreApi = true)]
 public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger<CategoriesController> logger) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
@@ -32,6 +34,10 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
     }
 
     // [Authorize]
+    /// <summary>
+    /// Get all categories
+    /// </summary>
+    /// <returns>A list of categories</returns>
     [HttpGet]
     [ServiceFilter(typeof(ApiLoggingFilter))]
     [DisableRateLimiting]
@@ -88,6 +94,11 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
         return Ok(categoriesDTO);
     }
 
+    /// <summary>
+    /// Get a category by its ID
+    /// </summary>
+    /// <param name="id">Category ID</param>
+    /// <returns>A category with the specified ID</returns>
     [DisableCors]
     [HttpGet("{id:int:min(1)}", Name = "GetCategoryById")]
     public async Task<ActionResult<CategoryDTO>> Get(int id)
@@ -104,6 +115,22 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
     }
 
 
+    /// <summary>
+    /// Create a new category
+    /// </summary>
+    /// <remarks>
+    /// Sample request:
+    /// {
+    ///     POST api/categories
+    ///     {
+    ///       "categoryId": 0,
+    ///       "name": "New Category",
+    ///       "imageUrl": "https://example.com/new-category.jpg"
+    ///     }
+    /// }
+    /// </remarks>
+    /// <param name="categoryDTO">Category data</param>
+    /// <returns>A new category created</returns>
     [DisableCors]
     [HttpPost]
     public async Task<ActionResult<CategoryDTO>> Post(CategoryDTO categoryDTO)
