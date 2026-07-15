@@ -6,6 +6,7 @@ using CatalogoAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace CatalogoAPI.Controllers;
 
@@ -24,6 +25,9 @@ public class AuthController(ITokenService tokenService, UserManager<ApplicationU
     [HttpPost]
     [Route("create-role")]
     [Authorize(Policy = "SuperAdminOnly")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ResponseDTO), StatusCodes.Status400BadRequest)]
+    [ProducesDefaultResponseType]
     public async Task<IActionResult> CreateRole(string roleName)
     {
         var roleExists = await _roleManager.RoleExistsAsync(roleName);
@@ -47,6 +51,10 @@ public class AuthController(ITokenService tokenService, UserManager<ApplicationU
     [HttpPost]
     [Route("assign-role")]
     [Authorize(Policy = "SuperAdminOnly")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ResponseDTO), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ResponseDTO), StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
     public async Task<IActionResult> AssignRole(string email, string roleName)
     {
         var user = await _userManager.FindByEmailAsync(email.ToLower());
@@ -81,6 +89,9 @@ public class AuthController(ITokenService tokenService, UserManager<ApplicationU
 
     [HttpPost]
     [Route("login")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesDefaultResponseType]
     public async Task<IActionResult> Login([FromBody] LoginDTO model)
     {
         var user = await _userManager.FindByNameAsync(model.UserName!);
@@ -116,6 +127,9 @@ public class AuthController(ITokenService tokenService, UserManager<ApplicationU
 
     [HttpPost]
     [Route("register")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ResponseDTO), StatusCodes.Status500InternalServerError)]
+    [ProducesDefaultResponseType]
     public async Task<IActionResult> Register([FromBody] RegisterDTO model)
     {
         var userExists = await _userManager.FindByNameAsync(model.UserName!);
@@ -139,6 +153,9 @@ public class AuthController(ITokenService tokenService, UserManager<ApplicationU
 
     [HttpPost]
     [Route("refresh-token")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ResponseDTO), StatusCodes.Status400BadRequest)]
+    [ProducesDefaultResponseType]
     public async Task<IActionResult> RefreshToken(TokenDTO tokenDTO)
     {
         if (tokenDTO is null)
@@ -171,6 +188,9 @@ public class AuthController(ITokenService tokenService, UserManager<ApplicationU
     [HttpPost]
     [Route("revoke/{username}")]
     [Authorize(Policy = "ExclusiveOnly")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
     public async Task<IActionResult> Revoke(string username)
     {
         var user = await _userManager.FindByNameAsync(username);

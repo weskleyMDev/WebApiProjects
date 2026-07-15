@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>fa4b917c-37c1-469b-871d-01f423961c40</UserSecretsId>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <IncludeOpenApiAnalyzers>true</IncludeOpenApiAnalyzers>
   </PropertyGroup>
 
   <ItemGroup>

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using X.PagedList;
+using Microsoft.AspNetCore.Http;
 
 namespace CatalogoAPI.Controllers;
 
@@ -15,12 +16,16 @@ namespace CatalogoAPI.Controllers;
 [ApiController]
 // ignore this controller in Swagger UI
 // [ApiExplorerSettings(IgnoreApi = true)]
+[ApiConventionType(typeof(DefaultApiConventions))]
 public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IMapper _mapper = mapper;
 
     [HttpGet("paginated")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsPaginated([FromQuery] ProductsParameters productsParameters)
     {
         var products = await _unitOfWork.ProductRepository.GetProductsAsync(productsParameters);
@@ -33,6 +38,9 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
     }
 
     [HttpGet("filter/price/paginated")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsByPrice([FromQuery] ProductsFilterPrice productsFilterPrice)
     {
         var products = await _unitOfWork.ProductRepository.GetProductsByPriceAsync(productsFilterPrice);
@@ -65,6 +73,9 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
     /// <returns>A list of products</returns>
     [HttpGet]
     [Authorize(Policy = "UserOnly")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProducts()
     {
         var products = await _unitOfWork.ProductRepository.GetAllAsync();
@@ -124,6 +135,10 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
     }
 
     [HttpPatch("{id:int:min(1)}/updatePartial")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<ProductDTOResponse>> Patch(int id, JsonPatchDocument<ProductDTOUpdate> pathProductDTO)
     {
         if (pathProductDTO is null || id <= 0)
@@ -150,6 +165,9 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
     }
 
     [HttpPut("{id:int:min(1)}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<ProductDTO>> Put(int id, ProductDTO productDTO)
     {
         if (id != productDTO.ProductId)

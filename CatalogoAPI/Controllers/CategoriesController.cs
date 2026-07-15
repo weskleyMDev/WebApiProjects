@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Newtonsoft.Json;
 using X.PagedList;
+using Microsoft.AspNetCore.Http;
 
 namespace CatalogoAPI.Controllers;
 
@@ -19,6 +20,7 @@ namespace CatalogoAPI.Controllers;
 [ApiController]
 // ignore this controller in Swagger UI
 // [ApiExplorerSettings(IgnoreApi = true)]
+[Produces("application/json")]
 public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger<CategoriesController> logger) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
@@ -41,6 +43,9 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
     [HttpGet]
     [ServiceFilter(typeof(ApiLoggingFilter))]
     [DisableRateLimiting]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get()
     {
         var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
@@ -55,6 +60,9 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
     }
 
     [HttpGet("paginated")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetPaginated([FromQuery] CategoriesParameters categoriesParameters)
     {
         var categories = await _unitOfWork.CategoryRepository.GetCategoriesAsync(categoriesParameters);
@@ -67,6 +75,9 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
     }
 
     [HttpGet("filter/name/paginated")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesByName([FromQuery] CategoriesFilterName categoriesFilterName)
     {
         var categories = await _unitOfWork.CategoryRepository.GetCategoriesByNameAsync(categoriesFilterName);
@@ -101,6 +112,8 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
     /// <returns>A category with the specified ID</returns>
     [DisableCors]
     [HttpGet("{id:int:min(1)}", Name = "GetCategoryById")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CategoryDTO>> Get(int id)
     {
         var category = await _unitOfWork.CategoryRepository.GetByIdAsync(c => c.CategoryId == id);
@@ -133,6 +146,8 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
     /// <returns>A new category created</returns>
     [DisableCors]
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<CategoryDTO>> Post(CategoryDTO categoryDTO)
     {
         if (categoryDTO is null)
@@ -151,6 +166,9 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
 
     [DisableCors]
     [HttpPut("{id:int:min(1)}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<CategoryDTO>> Put(int id, CategoryDTO categoryDTO)
     {
         if (id != categoryDTO.CategoryId)
@@ -171,6 +189,9 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
     [DisableCors]
     [HttpDelete("{id:int:min(1)}")]
     [Authorize(Policy = "AdminOnly")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<CategoryDTO>> Delete(int id)
     {
         var category = await _unitOfWork.CategoryRepository.GetByIdAsync(c => c.CategoryId == id);
