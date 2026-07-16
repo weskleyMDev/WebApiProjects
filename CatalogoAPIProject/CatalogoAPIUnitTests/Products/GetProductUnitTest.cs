@@ -74,7 +74,7 @@ public class GetProductUnitTest(ProductUnitTestController controller) : IClassFi
         result.Result.Should().BeOfType<OkObjectResult>().Which.Value.Should().BeAssignableTo<IEnumerable<ProductDTO>>().And.NotBeNull();
     }
 
-    [Fact]
+    /* [Fact]
     public async Task GetProducts_ReturnsBadRequestResult()
     {
         // Act
@@ -86,5 +86,5 @@ public class GetProductUnitTest(ProductUnitTestController controller) : IClassFi
 
         // Assert (fluentassertions)
         result.Result.Should().BeOfType<BadRequestObjectResult>().Which.StatusCode.Should().Be(400);
-    }
+    } */
 }

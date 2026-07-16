@@ -16,7 +16,6 @@ namespace CatalogoAPI.Controllers;
 [ApiController]
 // ignore this controller in Swagger UI
 // [ApiExplorerSettings(IgnoreApi = true)]
-[ApiConventionType(typeof(DefaultApiConventions))]
 public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
@@ -75,16 +74,25 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
     [Authorize(Policy = "UserOnly")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesDefaultResponseType]
     public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProducts()
     {
-        var products = await _unitOfWork.ProductRepository.GetAllAsync();
-        if (products is null)
+        try
         {
-            return NotFound("No products found!");
+            var products = await _unitOfWork.ProductRepository.GetAllAsync();
+            // throw new Exception("Simulated exception for testing purposes.");
+            if (products is null)
+            {
+                return NotFound("No products found!");
+            }
+            var productsDTO = _mapper.Map<IEnumerable<ProductDTO>>(products);
+            return Ok(productsDTO);
         }
-        var productsDTO = _mapper.Map<IEnumerable<ProductDTO>>(products);
-        return Ok(productsDTO);
+        catch (Exception)
+        {
+            return BadRequest("An error occurred while processing your request.");
+        }
     }
 
     /// <summary>
@@ -93,8 +101,16 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
     /// <param name="id">Product ID</param>
     /// <returns>A product with the specified ID</returns>
     [HttpGet("{id:int:min(1)}", Name = "GetProductById")]
-    public async Task<ActionResult<ProductDTO>> GetProduct(int id)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesDefaultResponseType]
+    public async Task<ActionResult<ProductDTO>> GetProduct(int? id)
     {
+        if (id == null || id <= 0)
+        {
+            return BadRequest("Invalid product ID.");
+        }
         var product = await _unitOfWork.ProductRepository.GetByIdAsync(p => p.ProductId == id);
         if (product is null)
         {
@@ -105,6 +121,9 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
     }
 
     [HttpGet("products/{id:int:min(1)}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsByCategory(int id)
     {
         var products = await _unitOfWork.ProductRepository.GetProductsByCategoryIdAsync(id);
@@ -117,6 +136,9 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
     }
 
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<ProductDTO>> Post(ProductDTO productDTO)
     {
         // if (!ModelState.IsValid)
@@ -182,6 +204,9 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
     }
 
     [HttpDelete("{id:int:min(1)}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<ProductDTO>> Delete(int id)
     {
         var product = await _unitOfWork.ProductRepository.GetByIdAsync(p => p.ProductId == id);
