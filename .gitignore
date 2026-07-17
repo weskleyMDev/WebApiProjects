@@ -63,3 +63,4 @@ nunit-*.xml
 .env.*
 appsettings.Development.json
 appsettings.json
+testsettings.json

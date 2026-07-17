@@ -23,6 +23,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CatalogoAPI\CatalogoAPI.csproj" />
+    <None Update="testsettings.json">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
   </ItemGroup>
 
 </Project>

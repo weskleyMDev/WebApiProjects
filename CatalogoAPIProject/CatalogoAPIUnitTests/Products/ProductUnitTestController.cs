@@ -4,6 +4,7 @@ using CatalogoAPI.DTOs.Mappings;
 using CatalogoAPI.Repositories;
 using CatalogoAPI.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace CatalogoAPIUnitTests.Products;
@@ -15,10 +16,12 @@ public class ProductUnitTestController
 
     public static DbContextOptions<AppDbContext> DbContextOptions { get; }
 
-    public static string ConnectionString { get; } = "";
-
     static ProductUnitTestController()
     {
+        var configuration = new ConfigurationBuilder()
+        .AddJsonFile("testsettings.json")
+        .Build();
+        var ConnectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         DbContextOptions = new DbContextOptionsBuilder<AppDbContext>()
             .UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString))
             .Options;
