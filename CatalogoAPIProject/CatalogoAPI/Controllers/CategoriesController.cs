@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Newtonsoft.Json;
 using X.PagedList;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CatalogoAPI.Controllers;
 
@@ -21,11 +22,13 @@ namespace CatalogoAPI.Controllers;
 // ignore this controller in Swagger UI
 // [ApiExplorerSettings(IgnoreApi = true)]
 [Produces("application/json")]
-public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger<CategoriesController> logger) : ControllerBase
+public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger<CategoriesController> logger, IMemoryCache memoryCache) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IConfiguration _configuration = configuration;
     private readonly ILogger<CategoriesController> _logger = logger;
+    private readonly IMemoryCache _memoryCache = memoryCache;
+    private const string CacheKey = "CategoriesCache";
 
     [HttpGet("config")]
     public ActionResult<string> GetConfigValue()
@@ -33,6 +36,38 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
         var value = _configuration["key1"];
         var subkey2 = _configuration["section1:subkey2"];
         return $"{value} - {subkey2}" ?? "Key not found";
+    }
+
+    [HttpGet("cache")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
+    public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesFromCache()
+    {
+        if (!_memoryCache.TryGetValue(CacheKey, out IEnumerable<CategoryDTO>? categoriesDTO))
+        {
+            var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
+
+            if (categories is not null && categories.Any())
+            {
+                categoriesDTO = categories.ToDTOs();
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
+                    SlidingExpiration = TimeSpan.FromMinutes(2),
+                    Priority = CacheItemPriority.Normal
+                };
+                _memoryCache.Set(CacheKey, categoriesDTO, cacheEntryOptions);
+            }
+            else
+            {
+                _logger.LogWarning("No categories found to cache.");
+                return NotFound("No categories found!");
+            }
+        }
+
+        return Ok(categoriesDTO);
     }
 
     // [Authorize]
