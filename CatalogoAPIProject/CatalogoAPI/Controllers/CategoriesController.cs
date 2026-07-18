@@ -47,18 +47,14 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
         if (!_memoryCache.TryGetValue(CacheKey, out IEnumerable<CategoryDTO>? categoriesDTO))
         {
             var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
+            categoriesDTO = categories.ToDTOs();
 
-            if (categories is not null && categories.Any())
-            {
-                categoriesDTO = categories.ToDTOs();
-
-                SetCategoryCache(CacheKey, categoriesDTO); // Set the cache for the list of categories
-            }
-            else
+            if (categoriesDTO is null || !categoriesDTO.Any())
             {
                 _logger.LogWarning("No categories found to cache.");
                 return NotFound("No categories found!");
             }
+            SetCategoryCache(CacheKey, categoriesDTO); // Set the cache for the list of categories
         }
 
         return Ok(categoriesDTO);
@@ -195,11 +191,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
 
         var newCategoryDTO = newCategory.ToDTO();
 
-        _memoryCache.Remove(CacheKey); // Invalidate the cache for the list of categories
-
-        var CacheKeyById = GetCacheKeyForCategory(newCategoryDTO!.CategoryId);
-
-        SetCategoryCache(CacheKeyById, newCategoryDTO); // Set the cache for the newly created category
+        RemoveCategoryCache(newCategoryDTO!.CategoryId, newCategoryDTO); // Invalidate the cache for the list of categories and update the cache for the newly created category
 
         return new CreatedAtRouteResult("GetCategoryById", new { id = newCategoryDTO!.CategoryId }, newCategoryDTO);
     }
@@ -223,10 +215,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
 
         var updatedCategoryDTO = updatedCategory.ToDTO();
 
-        var CacheKeyById = GetCacheKeyForCategory(updatedCategoryDTO!.CategoryId);
-        SetCategoryCache(CacheKeyById, updatedCategoryDTO); // Update the cache for the updated category
-
-        _memoryCache.Remove(CacheKey); // Invalidate the cache for the list of categories
+        RemoveCategoryCache(id, updatedCategoryDTO); // Invalidate the cache for the specific category and update the cache for the updated category
 
         return Ok(updatedCategoryDTO);
     }
@@ -249,8 +238,8 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
 
         var deletedCategoryDTO = deletedCategory.ToDTO();
 
-        _memoryCache.Remove(CacheKey); // Invalidate the cache for the list of categories
-        _memoryCache.Remove($"CacheCategory_{id}"); // Invalidate the cache for the deleted category
+        RemoveCategoryCache(id);
+
         return Ok(deletedCategoryDTO);
     }
 
@@ -265,6 +254,17 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
             Priority = CacheItemPriority.Normal
         };
         _memoryCache.Set(key, data, cacheEntryOptions);
+    }
+
+    private void RemoveCategoryCache(int id, CategoryDTO? categoryDTO = null)
+    {
+        _memoryCache.Remove(GetCacheKeyForCategory(id)); // Invalidate the cache for the specific category
+        _memoryCache.Remove(CacheKey); // Invalidate the cache for the list of categories
+
+        if (categoryDTO is not null)
+        {
+            SetCategoryCache(GetCacheKeyForCategory(categoryDTO.CategoryId), categoryDTO); // Update the cache for the specific category if provided
+        }
     }
 
 }
