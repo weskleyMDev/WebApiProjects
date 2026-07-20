@@ -1,6 +1,7 @@
-namespace Catalogo.Domain.Entities;
-
-public abstract class Entity
+﻿namespace Catalogo.Domain.Entities
 {
-    public int Id { get; protected set; }
+    public abstract class Entity
+    {
+        public int Id { get; protected set; }
+    }
 }

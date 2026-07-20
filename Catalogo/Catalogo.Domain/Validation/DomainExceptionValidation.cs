@@ -1,12 +1,16 @@
-namespace Catalogo.Domain.Validation;
+﻿using System;
 
-public class DomainExceptionValidation(string error) : Exception(error)
+namespace Catalogo.Domain.Validation
 {
-    public static void When(bool hasError, string error)
+    public class DomainExceptionValidation : Exception
     {
-        if (hasError)
+        public DomainExceptionValidation(string error) : base(error)
+        { }
+
+        public static void When(bool hasError, string error)
         {
-            throw new DomainExceptionValidation(error);
+            if (hasError)
+                throw new DomainExceptionValidation(error);
         }
     }
 }
