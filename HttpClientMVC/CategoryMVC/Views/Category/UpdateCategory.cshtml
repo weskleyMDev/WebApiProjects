@@ -1,0 +1,38 @@
+@model CategoryMVC.Models.CategoryViewModel
+
+<h3>Update Category</h3>
+<hr />
+
+<form asp-action="UpdateCategory">
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <input type="hidden" asp-for="CategoryId" />
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="mb-3 col-md-6">
+            <label asp-for="ImageUrl" class="form-label"></label>
+            <input asp-for="ImageUrl" class="form-control" />
+            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3 pt-2">
+        <input type="submit" value="Save" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-info">Back</a>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="text-danger">
+            <h4>@ViewBag.Error</h4>
+        </div>
+    }
+
+</form>

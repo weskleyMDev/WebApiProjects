@@ -133,9 +133,17 @@ builder.Services.AddCors(options =>
         name: "_originsAllowedAccess",
         policy =>
         {
-            policy.WithOrigins("https://apirequest.io")
+            /* policy.WithOrigins("https://apirequest.io")
                 .WithMethods("GET")
                 .AllowAnyHeader();
+        }); */
+            policy
+            	.WithOrigins(
+                	"http://localhost:5000",
+                	"http://127.0.0.1:5000"
+            	)
+            	.AllowAnyHeader()
+            	.AllowAnyMethod();
         });
 });
 
@@ -205,6 +213,18 @@ builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderCon
     LogLevel = LogLevel.Information,
 }));
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FlutterPolicy",
+        policy =>
+        {
+            policy
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 builder.Services.AddMemoryCache();
 
 var app = builder.Build();
@@ -225,7 +245,8 @@ app.UseHttpsRedirection();
 
 app.UseRateLimiter();
 
-app.UseCors();
+// app.UseCors();
+app.UseCors("_originsAllowedAccess");
 
 app.UseAuthorization();
 

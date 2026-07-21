@@ -222,7 +222,7 @@ public class CategoriesController(IUnitOfWork unitOfWork, IConfiguration configu
 
     [DisableCors]
     [HttpDelete("{id:int:min(1)}")]
-    [Authorize(Policy = "AdminOnly")]
+    // [Authorize(Policy = "AdminOnly")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]

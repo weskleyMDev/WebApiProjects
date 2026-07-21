@@ -21,7 +21,7 @@ public class CategoryService : ICategoryService
     public async Task<IEnumerable<CategoryViewModel>?> GetCategories()
     {
         var client = _clientFactory.CreateClient("CategoriesApi");
-        using (var response = await client.GetAsync(apiEndPoint))
+        using (var response = await client.GetAsync(apiEndPoint+"cache"))
         {
             if (response.IsSuccessStatusCode)
             {

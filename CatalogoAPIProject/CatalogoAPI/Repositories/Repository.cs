@@ -25,13 +25,13 @@ public class Repository<T>(AppDbContext context) : IRepository<T> where T : clas
 
     public async Task<IEnumerable<T>> GetAllAsync()
     {
-        Thread.Sleep(3000); // Simulate a delay of 3 seconds
+        await Task.Delay(3000); // Simulate a delay of 3 seconds
         return await _context.Set<T>().AsNoTracking().ToListAsync();
     }
 
     public async Task<T?> GetByIdAsync(Expression<Func<T, bool>> predicate)
     {
-        Thread.Sleep(3000); // Simulate a delay of 3 seconds
+        await Task.Delay(3000); // Simulate a delay of 3 seconds
         return await _context.Set<T>().AsNoTracking().FirstOrDefaultAsync(predicate);
     }
 
