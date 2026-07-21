@@ -50,7 +50,8 @@ public class AuthController(ITokenService tokenService, UserManager<ApplicationU
 
     [HttpPost]
     [Route("assign-role")]
-    [Authorize(Policy = "SuperAdminOnly")]
+    // [Authorize(Policy = "SuperAdminOnly")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ResponseDTO), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ResponseDTO), StatusCodes.Status404NotFound)]
@@ -146,7 +147,16 @@ public class AuthController(ITokenService tokenService, UserManager<ApplicationU
         var result = await _userManager.CreateAsync(user, model.Password!);
         if (!result.Succeeded)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+            return BadRequest(new
+            {
+                Status = "Error",
+                Errors = result.Errors.Select(e => new
+                {
+                    e.Code,
+                    e.Description
+                })
+            });
+            /* return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO { Status = "Error", Message = "User creation failed! Please check user details and try again." }); */
         }
         return Ok(new ResponseDTO { Status = "Success", Message = "User created successfully!" });
     }
