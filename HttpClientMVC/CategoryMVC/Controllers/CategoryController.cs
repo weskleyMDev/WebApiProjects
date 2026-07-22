@@ -8,7 +8,8 @@ public class CategoryController(ICategoryService service) : Controller
 {
     private readonly ICategoryService _service = service;
 
-    public async Task<ActionResult<IEnumerable<CategoryViewModel>>> Index()
+    [HttpGet]
+    public async Task<IActionResult> Index()
     {
         var result = await _service.GetCategories();
 
