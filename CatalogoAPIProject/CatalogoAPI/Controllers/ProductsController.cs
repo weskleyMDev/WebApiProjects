@@ -101,6 +101,7 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
     /// <param name="id">Product ID</param>
     /// <returns>A product with the specified ID</returns>
     [HttpGet("{id:int:min(1)}", Name = "GetProductById")]
+    [Authorize(Policy = "UserOnly")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
@@ -136,6 +137,7 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
     }
 
     [HttpPost]
+    [Authorize(Policy = "UserOnly")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesDefaultResponseType]
@@ -187,6 +189,7 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
     }
 
     [HttpPut("{id:int:min(1)}")]
+    [Authorize(Policy = "UserOnly")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesDefaultResponseType]
@@ -204,6 +207,7 @@ public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : Contro
     }
 
     [HttpDelete("{id:int:min(1)}")]
+    [Authorize(Policy = "UserOnly")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesDefaultResponseType]
