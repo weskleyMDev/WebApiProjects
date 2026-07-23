@@ -64,6 +64,36 @@ public class ProductController(IProductService productService, ICategoryService 
         return View(productView);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> UpdateProduct(int id)
+    {
+        var result = await _productService.GetProductById(id, GetTokenJwt());
+
+        if (result is null)
+        {
+            return View("Error");
+        }
+
+        ViewBag.CategoryId = new SelectList(await _categoryService.GetCategories(), "CategoryId", "Name");
+
+        return View(result);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UpdateProduct(int id, ProductViewModel productView)
+    {
+        if (ModelState.IsValid)
+        {
+            var result = await _productService.UpdateProduct(id, productView, GetTokenJwt());
+
+            if (result)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        return View(productView);
+    }
+
     private string GetTokenJwt()
     {
         if (HttpContext.Request.Cookies.TryGetValue("X-Access-Token", out var accessToken) && !string.IsNullOrEmpty(accessToken))
