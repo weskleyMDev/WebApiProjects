@@ -94,6 +94,31 @@ public class ProductController(IProductService productService, ICategoryService 
         return View(productView);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> RemoveProduct(int id)
+    {
+        var result = await _productService.GetProductById(id, GetTokenJwt());
+
+        if (result is null)
+        {
+            return View("Error");
+        }
+
+        return View(result);
+    }
+
+    [HttpPost(), ActionName("RemoveProduct")]
+    public async Task<IActionResult> ConfirmRemoveProduct(int id)
+    {
+        var result = await _productService.RemoveProduct(id, GetTokenJwt());
+
+        if (result)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+        return View("Error");
+    }
+
     private string GetTokenJwt()
     {
         if (HttpContext.Request.Cookies.TryGetValue("X-Access-Token", out var accessToken) && !string.IsNullOrEmpty(accessToken))
