@@ -24,14 +24,46 @@ app.MapGet("/", () => "Hello World!");
 app.MapGet("sentences", async () =>
     await new HttpClient().GetStringAsync("https://ron-swanson-quotes.herokuapp.com/v2/quotes")
 );
+
 app.MapGet("/tarefas", async (AppDbContext db) => await db.Tarefas.ToListAsync());
+
 app.MapGet("/tarefas/{id}", async (int id, AppDbContext db) => await db.Tarefas.FindAsync(id) is Tarefa tarefa ? Results.Ok(tarefa) : Results.NotFound("Tarefa não encontrada!"));
+
 app.MapGet("/tarefas/complete", async (AppDbContext db) => await db.Tarefas.Where(tarefa => tarefa.IsComplete).ToListAsync());
+
 app.MapPost("/tarefas", async (Tarefa tarefa, AppDbContext db) =>
 {
     db.Tarefas.Add(tarefa);
     await db.SaveChangesAsync();
     return Results.Created($"/tarefas/{tarefa.Id}", tarefa);
+});
+
+app.MapPut("/tarefas/{id}", async (int id, Tarefa input, AppDbContext db) =>
+{
+    var tarefa = await db.Tarefas.FindAsync(id);
+
+    if (tarefa is null)
+    {
+        return Results.NotFound($"Tarefa with id = {id} not found!");
+    }
+
+    tarefa.Name = input.Name;
+    tarefa.IsComplete = input.IsComplete;
+
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+});
+
+app.MapDelete("/tarefas/{id}", async (int id, AppDbContext db) =>
+{
+    if (await db.Tarefas.FindAsync(id) is Tarefa tarefa)
+    {
+        db.Tarefas.Remove(tarefa);
+        await db.SaveChangesAsync();
+        return Results.Ok(tarefa);
+    }
+
+    return Results.NotFound($"Tarefa with id = {id} not found!");
 });
 
 app.Run();
