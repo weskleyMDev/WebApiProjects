@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace CatalogoAPIMinimal.Models;
 
 public class Product
@@ -11,5 +13,7 @@ public class Product
     public DateTime CreatedAt { get; set; }
 
     public int CategoryId { get; set; }
+
+    [JsonIgnore]
     public Category? Category { get; set; }
 }
