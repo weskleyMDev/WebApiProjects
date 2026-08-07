@@ -1,71 +1,20 @@
-using System.Text;
 using CatalogoAPIMinimal.ApiEndpoints;
-using CatalogoAPIMinimal.Context;
-using CatalogoAPIMinimal.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using CatalogoAPIMinimal.ExtensionServices;
+using CatalogoAPIMinimal.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Catalogo Minimal API", Version = "v1" });
+builder.AddApiSwagger()
+       .AddDbConnection()
+       .AddAuthJwt();
 
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = @"JWT Authorization header using the Bearer scheme. Enter 'Bearer'[space]. Example: \'Bearer eweSdFDDdIUjs\'"
-    });
+builder.Services.AddCors();
 
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {new OpenApiSecurityScheme
-        {
-            Reference = new OpenApiReference
-            {
-                Type = ReferenceType.SecurityScheme,
-                Id = "Bearer"
-            }
-        }, Array.Empty<string>()
-        }
-    });
-});
-
-string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(
-        connectionString,
-        ServerVersion.AutoDetect(connectionString)
-    )
+builder.Services.Configure<JwtOptions>(
+    builder.Configuration.GetSection("Jwt")
 );
-
-builder.Services.AddSingleton<ITokenService>(new TokenService());
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
-    };
-});
-
-builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -77,12 +26,11 @@ app.MapCategoryEndpoints();
 
 app.MapProductEndpoints();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+var environment = app.Environment;
+
+app.UseExceptionHandling(environment)
+   .UseSwaggerMiddleware()
+   .UseAppCors();
 
 app.UseHttpsRedirection();
 
