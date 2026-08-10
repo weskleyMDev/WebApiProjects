@@ -76,4 +76,53 @@ public class StudentsController(IStudentService service) : ControllerBase
 
         return CreatedAtRoute("GetStudentById", new { id = newStudent.StudentId }, newStudent);
     }
+
+    /// <summary>
+    /// Update a student.
+    /// </summary>
+    /// <param name="id">Id to locate the student.</param>
+    /// <param name="studentDto">Data relating to the student.</param>
+    /// <returns>The updated student.</returns>
+    /// <response code="200">Shows the student with data updated.</response>
+    /// <response code="404">Student not found.</response>
+    [HttpPut("{id:int:min(1)}")]
+    [ProducesResponseType(typeof(OutputStudentDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ResponseMessage), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<OutputStudentDto>> UpdateStudentAsync(int id, InputStudentDto studentDto)
+    {
+        var updatedStudent = await _service.UpdateStudentAsync(id, studentDto);
+
+        if (updatedStudent is null)
+        {
+            return NotFound(new ResponseMessage(
+                $"Student with id={id} not found!"
+            ));
+        }
+
+        return Ok(updatedStudent);
+    }
+
+    /// <summary>
+    /// Removes the student.
+    /// </summary>
+    /// <param name="id">Id to remove the student.</param>
+    /// <returns>Nothing.</returns>
+    /// <response code="204">Student successfully removed.</response>
+    /// <response code="404">Student not found.</response>
+    [HttpDelete("{id:int:min(1)}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ResponseMessage), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> RemoveStudentAsync(int id)
+    {
+        bool isRemoved = await _service.RemoveStudentAsync(id);
+
+        if (!isRemoved)
+        {
+            return NotFound(new ResponseMessage(
+                $"Student with id={id} not found!"
+            ));
+        }
+
+        return NoContent();
+    }
 }

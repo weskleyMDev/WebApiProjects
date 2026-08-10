@@ -46,18 +46,18 @@ public class StudentService(AppDbContext context) : IStudentService
         return true;
     }
 
-    public async Task<bool> UpdateStudentAsync(int id, InputStudentDto studentDto)
+    public async Task<OutputStudentDto?> UpdateStudentAsync(int id, InputStudentDto studentDto)
     {
         var updatedStudent = await _context.Students.FindAsync(id);
 
         if (updatedStudent is null)
         {
-            return false;
+            return null;
         }
 
         studentDto.Adapt(updatedStudent);
 
         await _context.SaveChangesAsync();
-        return true;
+        return updatedStudent.Adapt<OutputStudentDto>();
     }
 }
