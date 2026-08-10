@@ -11,7 +11,6 @@ public class Student
     [StringLength(80)]
     public string? Name { get; set; }
 
-    [Required]
     public int Age { get; set; }
 
     [Required]
