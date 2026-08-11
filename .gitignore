@@ -66,3 +66,5 @@ docker/.env
 
 # Local test settings
 testsettings.json
+
+appsettings.json
