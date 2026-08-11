@@ -43,6 +43,7 @@ public class StudentsController(IStudentService service) : ControllerBase
     public async Task<ActionResult<OutputStudentDto>> GetStudentByIdAsync(int id)
     {
         var student = await _service.GetStudentByIdAsync(id);
+
         if (student is null)
         {
             return NotFound(new ResponseMessage
@@ -50,6 +51,7 @@ public class StudentsController(IStudentService service) : ControllerBase
                 $"Student with id={id} not found!"
             ));
         }
+        
         return Ok(student);
     }
 

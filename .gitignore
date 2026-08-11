@@ -57,10 +57,12 @@ nunit-*.xml
 .vs/
 .vscode/
 .idea/
+*.user
+*.suo
 
 # Environment / secrets
 .env
-.env.*
-appsettings.Development.json
-appsettings.json
+docker/.env
+
+# Local test settings
 testsettings.json
