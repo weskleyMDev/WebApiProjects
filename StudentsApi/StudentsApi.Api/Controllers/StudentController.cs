@@ -1,6 +1,8 @@
 using StudentsApi.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using StudentsApi.Api.DTOs;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace StudentsApi.Api.Controllers;
 
@@ -22,6 +24,7 @@ public class StudentsController(IStudentService service) : ControllerBase
     /// <response code="200">Successfully found a list of students or an empty list.</response>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<OutputStudentDto>), StatusCodes.Status200OK)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<ActionResult<IAsyncEnumerable<OutputStudentDto>>> GetStudentsAsync()
     {
         var students = await _service.GetStudentsAsync();

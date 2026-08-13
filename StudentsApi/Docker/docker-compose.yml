@@ -14,7 +14,7 @@ services:
       - "3306:3306"
 
     volumes:
-      - mysql_data:/var/lib/mysql
+      - students_data:/var/lib/mysql
 
     healthcheck:
       test:
@@ -30,7 +30,7 @@ services:
   api:
     build:
       context: ../StudentsApi.Api
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
 
     container_name: studentsapi-api
     restart: unless-stopped
@@ -44,9 +44,14 @@ services:
     ports:
       - "8080:8080"
 
+    # volumes:
+      # - ../StudentsApi.Api:/src
+
+    # working_dir: /src
+
     depends_on:
       mysql:
         condition: service_healthy
 
 volumes:
-  mysql_data:
+  students_data:
