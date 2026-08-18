@@ -8,6 +8,7 @@ public class UnitOfWork(AppDbContext context) : IUnitOfWork
     private IProductRepository? _productRepository;
     private ICategoryRepository? _categoryRepository;
     public AppDbContext _context = context;
+
     public IProductRepository ProductRepository => _productRepository ??= new ProductRepository(_context);
 
     public ICategoryRepository CategoryRepository => _categoryRepository ??= new CategoryRepository(_context);

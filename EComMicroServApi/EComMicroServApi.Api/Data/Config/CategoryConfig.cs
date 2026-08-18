@@ -10,7 +10,7 @@ public class CategoryConfig : IEntityTypeConfiguration<Category>
     {
         builder.ToTable("Categories");
 
-        builder.HasKey(c => c.CategoryId);
+        builder.HasKey(c => c.Id);
 
         builder.Property(c => c.Name).IsRequired().HasMaxLength(80);
     }
