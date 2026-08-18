@@ -10,11 +10,11 @@ public class Repository<I, O, E>(AppDbContext context) : IRepository<I, O, E> wh
 {
     protected readonly AppDbContext _context = context;
 
-    public O Add(I entityDto)
+    public E Add(I entityDto)
     {
         var entity = entityDto.Adapt<E>();
         _context.Set<E>().Add(entity);
-        return entity.Adapt<O>();
+        return entity;
     }
 
     public async Task<bool> DeleteAsync(int id)

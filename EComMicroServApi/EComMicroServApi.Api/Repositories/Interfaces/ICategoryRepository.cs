@@ -5,4 +5,5 @@ namespace EComMicroServApi.Api.Repositories.Interfaces;
 
 public interface ICategoryRepository : IRepository<InputCategoryDto, OutputCategoryDto, Category>
 {
+    Task<IEnumerable<OutputCategoryDto>> GetCategoriesWithProducts();
 }
