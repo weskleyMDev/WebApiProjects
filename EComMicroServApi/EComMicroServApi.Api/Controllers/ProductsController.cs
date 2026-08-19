@@ -1,5 +1,6 @@
 using EComMicroServApi.Api.Models.DTOs;
 using EComMicroServApi.Api.Repositories.Interfaces;
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EComMicroServApi.Api.Controllers;
@@ -29,10 +30,11 @@ public class ProductsController(IUnitOfWork unitOfWork) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateProduct(InputProductDto product)
+    public async Task<IActionResult> CreateProduct(InputProductDto productDto)
     {
-        var result =_unitOfWork.Products.Add(product);
+        var product = _unitOfWork.Products.Add(productDto);
         await _unitOfWork.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetProducts), new { id = result.Id }, result);
+        var newProduct = product.Adapt<OutputProductDto>();
+        return CreatedAtAction(nameof(GetProduct), new { id = newProduct.Id }, newProduct);
     }
 }

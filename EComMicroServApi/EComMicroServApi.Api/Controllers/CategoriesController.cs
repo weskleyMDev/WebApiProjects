@@ -14,6 +14,13 @@ public class CategoriesController(IUnitOfWork unitOfWork) : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetCategories()
     {
+        var categories = await _unitOfWork.Categories.GetAllAsync();
+        return Ok(categories);
+    }
+
+    [HttpGet("Products")]
+    public async Task<IActionResult> GetCategoriesWithProducts()
+    {
         var categories = await _unitOfWork.Categories.GetCategoriesWithProducts();
         return Ok(categories);
     }
@@ -35,6 +42,6 @@ public class CategoriesController(IUnitOfWork unitOfWork) : ControllerBase
         var category = _unitOfWork.Categories.Add(categoryDto);
         await _unitOfWork.SaveChangesAsync();
         var newCAtegory = category.Adapt<OutputCategoryDto>();
-        return CreatedAtAction(nameof(GetCategories), new { id = newCAtegory.Id }, newCAtegory);
+        return CreatedAtAction(nameof(GetCategory), new { id = newCAtegory.Id }, newCAtegory);
     }
 }
