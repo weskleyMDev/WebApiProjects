@@ -1,47 +1,65 @@
 using EComMicroServApi.Api.Models.DTOs;
 using EComMicroServApi.Api.Repositories.Interfaces;
-using Mapster;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EComMicroServApi.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Produces("application/json")]
 public class CategoriesController(IUnitOfWork unitOfWork) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     [HttpGet]
-    public async Task<IActionResult> GetCategories()
+    public async Task<IEnumerable<OutputCategoryDto>> GetCategories()
     {
-        var categories = await _unitOfWork.Categories.GetAllAsync();
-        return Ok(categories);
+        return await _unitOfWork.CategoryService.GetAllAsync();
     }
 
     [HttpGet("Products")]
-    public async Task<IActionResult> GetCategoriesWithProducts()
+    public async Task<IEnumerable<OutputCategoryDto>> GetCategoriesWithProducts()
     {
-        var categories = await _unitOfWork.Categories.GetCategoriesWithProducts();
-        return Ok(categories);
+        return await _unitOfWork.CategoryService.GetCategoriesWithProducts();
     }
 
     [HttpGet("{id:int:min(1)}", Name = "GetCategory")]
-    public async Task<IActionResult> GetCategory(int id)
+    public async Task<ActionResult<OutputCategoryDto>> GetCategory(int id)
     {
-        var category = await _unitOfWork.Categories.GetByIdAsync(id);
+        var category = await _unitOfWork.CategoryService.GetByIdAsync(id);
         if (category == null)
         {
             return NotFound();
         }
-        return Ok(category);
+        return category;
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateCategory(InputCategoryDto categoryDto)
+    public async Task<ActionResult<OutputCategoryDto>> CreateCategory(InputCategoryDto categoryDto)
     {
-        var category = _unitOfWork.Categories.Add(categoryDto);
-        await _unitOfWork.SaveChangesAsync();
-        var newCAtegory = category.Adapt<OutputCategoryDto>();
-        return CreatedAtAction(nameof(GetCategory), new { id = newCAtegory.Id }, newCAtegory);
+        var category = _unitOfWork.CategoryService.CreateAsync(categoryDto);
+        return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
+    }
+
+    [HttpPut("{id:int:min(1)}")]
+    public async Task<ActionResult<OutputCategoryDto>> UpdateCategory(int id, InputCategoryDto categoryDto)
+    {
+        var updatedCategory = await _unitOfWork.CategoryService.UpdateAsync(id, categoryDto);
+        if (updatedCategory is null)
+        {
+            return NotFound();
+        }
+        return Ok(updatedCategory);
+    }
+
+    [HttpDelete("{id:int:min(1)}")]
+    public async Task<IActionResult> RemoveCategory(int id)
+    {
+        var isDeleted = await _unitOfWork.CategoryService.DeleteAsync(id);
+        if (!isDeleted)
+        {
+            return NotFound();
+        }
+        return NoContent();
     }
 }

@@ -6,13 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EComMicroServApi.Api.Repositories;
 
-public class Repository<I, O, E>(AppDbContext context) : IRepository<I, O, E> where I : class where O : class where E : class, IEntity
+public class Repository<E>(AppDbContext context) : IRepository<E> where E : class, IEntity
 {
     protected readonly AppDbContext _context = context;
 
-    public E Add(I entityDto)
+    public E Create(E entity)
     {
-        var entity = entityDto.Adapt<E>();
         _context.Set<E>().Add(entity);
         return entity;
     }
@@ -28,30 +27,29 @@ public class Repository<I, O, E>(AppDbContext context) : IRepository<I, O, E> wh
         return true;
     }
 
-    public async Task<IEnumerable<O>> GetAllAsync()
+    public async Task<IEnumerable<E>> GetAllAsync()
     {
-        var entities = await _context.Set<E>().AsNoTracking().ToListAsync();
-        return entities.Adapt<IEnumerable<O>>();
+        return await _context.Set<E>().AsNoTracking().ToListAsync();
     }
 
-    public async Task<O?> GetByIdAsync(int id)
+    public async Task<E?> GetByIdAsync(int id)
     {
         var entity = await _context.Set<E>().AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
         if (entity == null)
         {
             return null;
         }
-        return entity.Adapt<O>();
+        return entity;
     }
 
-    public async Task<O?> UpdateAsync(int id, I entityDto)
+    public async Task<E?> UpdateAsync(int id, E entity)
     {
-        var entity = await _context.Set<E>().FindAsync(id);
-        if (entity == null)
+        var updatedEntity = await _context.Set<E>().FindAsync(id);
+        if (updatedEntity == null)
         {
             return null;
         }
-        entityDto.Adapt(entity);
-        return entity.Adapt<O>();
+        entity.Adapt(updatedEntity);
+        return updatedEntity;
     }
 }

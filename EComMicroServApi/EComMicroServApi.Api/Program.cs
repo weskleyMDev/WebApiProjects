@@ -1,6 +1,8 @@
 using EComMicroServApi.Api.Data;
 using EComMicroServApi.Api.Repositories;
 using EComMicroServApi.Api.Repositories.Interfaces;
+using EComMicroServApi.Api.Services;
+using EComMicroServApi.Api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

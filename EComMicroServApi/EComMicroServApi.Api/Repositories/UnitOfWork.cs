@@ -2,24 +2,26 @@ namespace EComMicroServApi.Api.Repositories;
 
 using EComMicroServApi.Api.Data;
 using EComMicroServApi.Api.Repositories.Interfaces;
+using EComMicroServApi.Api.Services;
+using EComMicroServApi.Api.Services.Interfaces;
 
 public class UnitOfWork(AppDbContext context) : IUnitOfWork
 {
     private readonly AppDbContext _context = context;
 
-    private IProductRepository? _products;
-    private ICategoryRepository? _categories;
+    private IProductService? _productService;
+    private ICategoryService? _categoryService;
+    private IProductRepository? _productRepository;
+    private ICategoryRepository? _categoryRepository;
 
-    public IProductRepository Products =>
-        _products ??= new ProductRepository(_context);
-
-    public ICategoryRepository Categories =>
-        _categories ??= new CategoryRepository(_context);
-
-    public async Task<int> SaveChangesAsync()
-    {
-        return await _context.SaveChangesAsync();
-    }
+    private IProductRepository ProductRepository =>
+        _productRepository ??= new ProductRepository(_context);
+    public IProductService ProductService =>
+        _productService ??= new ProductService(_context, ProductRepository);
+    private ICategoryRepository CategoryRepository =>
+        _categoryRepository ??= new CategoryRepository(_context);
+    public ICategoryService CategoryService =>
+        _categoryService ??= new CategoryService(_context, CategoryRepository);
 
     public void Dispose()
     {

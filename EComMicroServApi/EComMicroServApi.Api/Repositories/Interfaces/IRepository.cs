@@ -1,10 +1,10 @@
 namespace EComMicroServApi.Api.Repositories.Interfaces;
 
-public interface IRepository<I, O, E>
+public interface IRepository<E>
 {
-    Task<IEnumerable<O>> GetAllAsync();
-    Task<O?> GetByIdAsync(int id);
-    E Add(I entityDto);
-    Task<O?> UpdateAsync(int id, I entityDto);
+    Task<IEnumerable<E>> GetAllAsync();
+    Task<E?> GetByIdAsync(int id);
+    E Create(E entity);
+    Task<E?> UpdateAsync(int id, E entity);
     Task<bool> DeleteAsync(int id);
 }

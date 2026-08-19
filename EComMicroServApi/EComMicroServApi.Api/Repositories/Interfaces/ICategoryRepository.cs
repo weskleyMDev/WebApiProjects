@@ -3,7 +3,7 @@ using EComMicroServApi.Api.Models.DTOs;
 
 namespace EComMicroServApi.Api.Repositories.Interfaces;
 
-public interface ICategoryRepository : IRepository<InputCategoryDto, OutputCategoryDto, Category>
+public interface ICategoryRepository : IRepository<Category>
 {
-    Task<IEnumerable<OutputCategoryDto>> GetCategoriesWithProducts();
+    Task<IEnumerable<Category>> GetCategoriesWithProducts();
 }
