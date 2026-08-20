@@ -37,7 +37,7 @@ public class CategoriesController(IUnitOfWork unitOfWork) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<OutputCategoryDto>> CreateCategory(InputCategoryDto categoryDto)
     {
-        var category = _unitOfWork.CategoryService.CreateAsync(categoryDto);
+        var category = await _unitOfWork.CategoryService.CreateAsync(categoryDto);
         return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
     }
 

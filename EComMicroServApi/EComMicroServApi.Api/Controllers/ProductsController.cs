@@ -31,7 +31,7 @@ public class ProductsController(IUnitOfWork unitOfWork) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<OutputProductDto>> CreateProduct(InputProductDto productDto)
     {
-        var product = _unitOfWork.ProductService.CreateAsync(productDto);
+        var product = await _unitOfWork.ProductService.CreateAsync(productDto);
         return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
     }
 
