@@ -11,7 +11,7 @@ public class CrudService<I, O, E, R>(AppDbContext context, R repository) : ICrud
     protected readonly AppDbContext _context = context;
     protected readonly R _repository = repository;
 
-    public async Task<O> CreateAsync(I entityDto)
+    public virtual async Task<O> CreateAsync(I entityDto)
     {
         var entity = entityDto.Adapt<E>();
         _repository.Create(entity);
@@ -46,7 +46,7 @@ public class CrudService<I, O, E, R>(AppDbContext context, R repository) : ICrud
         return entity.Adapt<O>();
     }
 
-    public async Task<O?> UpdateAsync(int id, I entityDto)
+    public virtual async Task<O?> UpdateAsync(int id, I entityDto)
     {
         var entity = entityDto.Adapt<E>();
         var updatedEntity = await _repository.UpdateAsync(id, entity);

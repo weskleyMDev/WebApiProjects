@@ -31,7 +31,7 @@ public class CategoriesController(IUnitOfWork unitOfWork) : ControllerBase
         {
             return NotFound();
         }
-        return category;
+        return Ok(category);
     }
 
     [HttpPost]

@@ -1,8 +1,11 @@
 using EComMicroServApi.Api.Data;
+using EComMicroServApi.Api.Models.Mappings;
 using EComMicroServApi.Api.Repositories;
 using EComMicroServApi.Api.Repositories.Interfaces;
 using EComMicroServApi.Api.Services;
 using EComMicroServApi.Api.Services.Interfaces;
+using Mapster;
+using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,7 +23,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+var config = TypeAdapterConfig.GlobalSettings;
+
+config.Scan(typeof(ProductMapping).Assembly);
+
 var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/error");
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -17,7 +17,7 @@ public class UnitOfWork(AppDbContext context) : IUnitOfWork
     private IProductRepository ProductRepository =>
         _productRepository ??= new ProductRepository(_context);
     public IProductService ProductService =>
-        _productService ??= new ProductService(_context, ProductRepository);
+        _productService ??= new ProductService(_context, ProductRepository, CategoryRepository);
     private ICategoryRepository CategoryRepository =>
         _categoryRepository ??= new CategoryRepository(_context);
     public ICategoryService CategoryService =>

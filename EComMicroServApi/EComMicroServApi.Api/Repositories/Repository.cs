@@ -27,12 +27,12 @@ public class Repository<E>(AppDbContext context) : IRepository<E> where E : clas
         return true;
     }
 
-    public async Task<IEnumerable<E>> GetAllAsync()
+    public virtual async Task<IEnumerable<E>> GetAllAsync()
     {
         return await _context.Set<E>().AsNoTracking().ToListAsync();
     }
 
-    public async Task<E?> GetByIdAsync(int id)
+    public virtual async Task<E?> GetByIdAsync(int id)
     {
         var entity = await _context.Set<E>().AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
         if (entity == null)
@@ -42,14 +42,24 @@ public class Repository<E>(AppDbContext context) : IRepository<E> where E : clas
         return entity;
     }
 
-    public async Task<E?> UpdateAsync(int id, E entity)
+    public virtual async Task<E?> UpdateAsync(int id, E entity)
     {
         var updatedEntity = await _context.Set<E>().FindAsync(id);
         if (updatedEntity == null)
         {
             return null;
         }
-        entity.Adapt(updatedEntity);
+        var entry = _context.Entry(updatedEntity);
+
+        foreach (var property in entry.Properties)
+        {
+            if (property.Metadata.IsPrimaryKey())
+            {
+                continue;
+            }
+
+            property.CurrentValue = property.Metadata.PropertyInfo?.GetValue(entity);
+        }
         return updatedEntity;
     }
 }
