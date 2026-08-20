@@ -7,4 +7,5 @@ public interface IRepository<E>
     E Create(E entity);
     Task<E?> UpdateAsync(int id, E entity);
     Task<bool> DeleteAsync(int id);
+    Task SaveChangesAsync();
 }

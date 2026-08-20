@@ -7,7 +7,7 @@ using Mapster;
 
 namespace EComMicroServApi.Api.Services;
 
-public class CategoryService(AppDbContext context, ICategoryRepository repository) : CrudService<InputCategoryDto, OutputCategoryDto, Category, ICategoryRepository>(context, repository), ICategoryService
+public class CategoryService(ICategoryRepository repository) : CrudService<InputCategoryDto, OutputCategoryDto, Category, ICategoryRepository>(repository), ICategoryService
 {
     public async Task<IEnumerable<OutputCategoryDto>> GetCategoriesWithProducts()
     {

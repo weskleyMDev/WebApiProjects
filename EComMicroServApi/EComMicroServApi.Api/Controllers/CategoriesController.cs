@@ -1,5 +1,6 @@
 using EComMicroServApi.Api.Models.DTOs;
 using EComMicroServApi.Api.Repositories.Interfaces;
+using EComMicroServApi.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EComMicroServApi.Api.Controllers;
@@ -7,26 +8,26 @@ namespace EComMicroServApi.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class CategoriesController(IUnitOfWork unitOfWork) : ControllerBase
+public class CategoriesController(ICategoryService service) : ControllerBase
 {
-    private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly ICategoryService _service = service;
 
     [HttpGet]
     public async Task<IEnumerable<OutputCategoryDto>> GetCategories()
     {
-        return await _unitOfWork.CategoryService.GetAllAsync();
+        return await _service.GetAllAsync();
     }
 
     [HttpGet("Products")]
     public async Task<IEnumerable<OutputCategoryDto>> GetCategoriesWithProducts()
     {
-        return await _unitOfWork.CategoryService.GetCategoriesWithProducts();
+        return await _service.GetCategoriesWithProducts();
     }
 
     [HttpGet("{id:int:min(1)}", Name = "GetCategory")]
     public async Task<ActionResult<OutputCategoryDto>> GetCategory(int id)
     {
-        var category = await _unitOfWork.CategoryService.GetByIdAsync(id);
+        var category = await _service.GetByIdAsync(id);
         if (category == null)
         {
             return NotFound();
@@ -37,14 +38,14 @@ public class CategoriesController(IUnitOfWork unitOfWork) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<OutputCategoryDto>> CreateCategory(InputCategoryDto categoryDto)
     {
-        var category = await _unitOfWork.CategoryService.CreateAsync(categoryDto);
+        var category = await _service.CreateAsync(categoryDto);
         return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
     }
 
     [HttpPut("{id:int:min(1)}")]
     public async Task<ActionResult<OutputCategoryDto>> UpdateCategory(int id, InputCategoryDto categoryDto)
     {
-        var updatedCategory = await _unitOfWork.CategoryService.UpdateAsync(id, categoryDto);
+        var updatedCategory = await _service.UpdateAsync(id, categoryDto);
         if (updatedCategory is null)
         {
             return NotFound();
@@ -55,7 +56,7 @@ public class CategoriesController(IUnitOfWork unitOfWork) : ControllerBase
     [HttpDelete("{id:int:min(1)}")]
     public async Task<IActionResult> RemoveCategory(int id)
     {
-        var isDeleted = await _unitOfWork.CategoryService.DeleteAsync(id);
+        var isDeleted = await _service.DeleteAsync(id);
         if (!isDeleted)
         {
             return NotFound();

@@ -1,15 +1,14 @@
-using EComMicroServApi.Api.Data;
+using EComMicroServApi.Api.Exceptions;
 using EComMicroServApi.Api.Models;
 using EComMicroServApi.Api.Models.DTOs;
 using EComMicroServApi.Api.Repositories.Interfaces;
 using EComMicroServApi.Api.Services.Interfaces;
 using Mapster;
-using Microsoft.EntityFrameworkCore;
 
 namespace EComMicroServApi.Api.Services;
 
-public class ProductService(AppDbContext context, IProductRepository repository,
-    ICategoryRepository categoryRepository) : CrudService<InputProductDto, OutputProductDto, Product, IProductRepository>(context, repository), IProductService
+public class ProductService(IProductRepository repository,
+    ICategoryRepository categoryRepository) : CrudService<InputProductDto, OutputProductDto, Product, IProductRepository>(repository), IProductService
 {
     private readonly ICategoryRepository _categoryRepository = categoryRepository;
     public override async Task<OutputProductDto> CreateAsync(InputProductDto entityDto)
@@ -20,13 +19,10 @@ public class ProductService(AppDbContext context, IProductRepository repository,
 
         _repository.Create(entity);
 
-        await _context.SaveChangesAsync();
+        await _repository.SaveChangesAsync();
 
-        var product = await _context.Products
-            .Include(p => p.Category)
-            .AsNoTracking()
-            .FirstAsync(p => p.Id == entity.Id);
-
+        var product = await _repository.GetByIdAsync(entity.Id) ?? throw new InvalidOperationException(
+                $"Product with id {entity.Id} was not found after creation.");
         return product.Adapt<OutputProductDto>();
     }
 
@@ -36,24 +32,12 @@ public class ProductService(AppDbContext context, IProductRepository repository,
     {
         await ValidateCategoryAsync(entityDto.CategoryId);
 
-        var result = await base.UpdateAsync(id, entityDto);
-
-        if (result is null)
-        {
-            return null;
-        }
-
-        var product = await _context.Products
-            .Include(p => p.Category)
-            .AsNoTracking()
-            .FirstAsync(p => p.Id == id);
-
-        return product.Adapt<OutputProductDto>();
+        return await base.UpdateAsync(id, entityDto);
     }
 
     private async Task ValidateCategoryAsync(int categoryId)
     {
-        var category = await _categoryRepository.GetByIdAsync(categoryId) ?? throw new KeyNotFoundException(
-                $"Category with id {categoryId} was not found.");
+        var category = await _categoryRepository.GetByIdAsync(categoryId) ?? throw new NotFoundException(
+            $"Category with id {categoryId} was not found.");
     }
 }

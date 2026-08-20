@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace EComMicroServApi.Api.Controllers;
 
 [ApiController]
+[Route("[controller]")]
 public class ErrorController : ControllerBase
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
-    [Route("/error")]
+    [HttpGet]
     public IActionResult Error()
     {
         var exception = HttpContext.Features
@@ -21,6 +21,9 @@ public class ErrorController : ControllerBase
             });
         }
 
-        return Problem();
+        return StatusCode(StatusCodes.Status500InternalServerError, new
+        {
+            message = "An unexpected error occurred."
+        });
     }
 }

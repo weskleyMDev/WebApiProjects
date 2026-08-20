@@ -24,4 +24,24 @@ public class ProductRepository(AppDbContext context) : Repository<Product>(conte
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id);
     }
+
+    public override async Task<Product?> UpdateAsync(int id, Product entity)
+    {
+        var updatedEntity = await _context.Products
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (updatedEntity == null)
+        {
+            return null;
+        }
+
+        updatedEntity.Name = entity.Name;
+        updatedEntity.Price = entity.Price;
+        updatedEntity.Description = entity.Description;
+        updatedEntity.Stock = entity.Stock;
+        updatedEntity.ImageUrl = entity.ImageUrl;
+        updatedEntity.CategoryId = entity.CategoryId;
+
+        return updatedEntity;
+    }
 }

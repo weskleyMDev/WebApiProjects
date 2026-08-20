@@ -6,16 +6,15 @@ using Mapster;
 
 namespace EComMicroServApi.Api.Services;
 
-public class CrudService<I, O, E, R>(AppDbContext context, R repository) : ICrudService<I, O> where I : class where O : class where E : class, IEntity where R : IRepository<E>
+public class CrudService<I, O, E, R>(R repository) : ICrudService<I, O> where I : class where O : class where E : class, IEntity where R : IRepository<E>
 {
-    protected readonly AppDbContext _context = context;
     protected readonly R _repository = repository;
 
     public virtual async Task<O> CreateAsync(I entityDto)
     {
         var entity = entityDto.Adapt<E>();
         _repository.Create(entity);
-        await _context.SaveChangesAsync();
+        await _repository.SaveChangesAsync();
         return entity.Adapt<O>();
     }
 
@@ -26,7 +25,7 @@ public class CrudService<I, O, E, R>(AppDbContext context, R repository) : ICrud
         {
             return false;
         }
-        await _context.SaveChangesAsync();
+        await _repository.SaveChangesAsync();
         return true;
     }
 
@@ -54,7 +53,7 @@ public class CrudService<I, O, E, R>(AppDbContext context, R repository) : ICrud
         {
             return null;
         }
-        await _context.SaveChangesAsync();
+        await _repository.SaveChangesAsync();
         return updatedEntity.Adapt<O>();
     }
 }

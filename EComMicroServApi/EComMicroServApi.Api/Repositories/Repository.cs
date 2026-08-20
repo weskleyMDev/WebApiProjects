@@ -34,12 +34,7 @@ public class Repository<E>(AppDbContext context) : IRepository<E> where E : clas
 
     public virtual async Task<E?> GetByIdAsync(int id)
     {
-        var entity = await _context.Set<E>().AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
-        if (entity == null)
-        {
-            return null;
-        }
-        return entity;
+        return await _context.Set<E>().AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
     }
 
     public virtual async Task<E?> UpdateAsync(int id, E entity)
@@ -61,5 +56,10 @@ public class Repository<E>(AppDbContext context) : IRepository<E> where E : clas
             property.CurrentValue = property.Metadata.PropertyInfo?.GetValue(entity);
         }
         return updatedEntity;
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
     }
 }
