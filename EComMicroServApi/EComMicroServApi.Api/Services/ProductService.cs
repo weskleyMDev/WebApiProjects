@@ -7,10 +7,12 @@ using Mapster;
 
 namespace EComMicroServApi.Api.Services;
 
-public class ProductService(IProductRepository repository,
-    ICategoryRepository categoryRepository) : CrudService<InputProductDto, OutputProductDto, Product, IProductRepository>(repository), IProductService
+public class ProductService(IProductRepository repository, ICategoryRepository categoryRepository)
+    : CrudService<InputProductDto, OutputProductDto, Product, IProductRepository>(repository),
+        IProductService
 {
     private readonly ICategoryRepository _categoryRepository = categoryRepository;
+
     public override async Task<OutputProductDto> CreateAsync(InputProductDto entityDto)
     {
         await ValidateCategoryAsync(entityDto.CategoryId);
@@ -21,14 +23,15 @@ public class ProductService(IProductRepository repository,
 
         await _repository.SaveChangesAsync();
 
-        var product = await _repository.GetByIdAsync(entity.Id) ?? throw new InvalidOperationException(
-                $"Product with id {entity.Id} was not found after creation.");
+        var product =
+            await _repository.GetByIdAsync(entity.Id)
+            ?? throw new InvalidOperationException(
+                $"Product with id {entity.Id} was not found after creation."
+            );
         return product.Adapt<OutputProductDto>();
     }
 
-    public override async Task<OutputProductDto?> UpdateAsync(
-    int id,
-    InputProductDto entityDto)
+    public override async Task<OutputProductDto?> UpdateAsync(int id, InputProductDto entityDto)
     {
         await ValidateCategoryAsync(entityDto.CategoryId);
 
@@ -37,7 +40,8 @@ public class ProductService(IProductRepository repository,
 
     private async Task ValidateCategoryAsync(int categoryId)
     {
-        var category = await _categoryRepository.GetByIdAsync(categoryId) ?? throw new NotFoundException(
-            $"Category with id {categoryId} was not found.");
+        var category =
+            await _categoryRepository.GetByIdAsync(categoryId)
+            ?? throw new NotFoundException($"Category with id {categoryId} was not found.");
     }
 }

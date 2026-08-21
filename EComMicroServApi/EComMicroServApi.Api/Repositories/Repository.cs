@@ -6,7 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EComMicroServApi.Api.Repositories;
 
-public class Repository<E>(AppDbContext context) : IRepository<E> where E : class, IEntity
+public class Repository<E>(AppDbContext context) : IRepository<E>
+    where E : class, IEntity
 {
     protected readonly AppDbContext _context = context;
 

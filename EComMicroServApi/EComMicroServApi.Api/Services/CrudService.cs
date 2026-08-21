@@ -6,7 +6,11 @@ using Mapster;
 
 namespace EComMicroServApi.Api.Services;
 
-public class CrudService<I, O, E, R>(R repository) : ICrudService<I, O> where I : class where O : class where E : class, IEntity where R : IRepository<E>
+public class CrudService<I, O, E, R>(R repository) : ICrudService<I, O>
+    where I : class
+    where O : class
+    where E : class, IEntity
+    where R : IRepository<E>
 {
     protected readonly R _repository = repository;
 
